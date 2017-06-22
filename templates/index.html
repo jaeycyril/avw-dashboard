@@ -1,0 +1,116 @@
+</!DOCTYPE html>
+<html>
+<head>
+	<title>Hello pages</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/bootstrap.min.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/dc.min.css') }}">
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">AVW DASHBOARD</a>
+    </div>
+</nav>
+
+ <div class="row">
+ <div class="col-md-12">
+ 	<h1>Boss babyin'</h1>
+ </div>
+ </div>
+
+ <div class="row">
+ 	<div class="col-md-6" id=commentsPerMinute>
+ 		<p>The quick fox jumped over the lazy dog</p>
+ 	</div>
+ 	<div class="col-md-6" id=videoPie>
+ 		<p>The quick fox jumped over the lazy dog</p>
+ 	</div>
+ </div>
+
+
+<!-- js section -->
+<script src="{{ url_for('static', filename='lib/js/d3.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/js/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/js/crossfilter.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/js/dc.min.js') }}"></script>
+
+<script>
+	d3.csv("{{ url_for('static', filename='presentation1.csv') }}",function(data){
+			data.forEach(function(d){
+				d.CommentId = +d.CommentId;
+				d.Cuepoint = +d.Cuepoint;
+				d.Cuebin = +d.Cuebin;
+			});
+			//console.log(data[0]);
+
+			var ndx = crossfilter(data);
+
+			// Get cuepoint bins as dimension
+			var timeDim = ndx.dimension(function(d){
+				return d.Cuebin;
+			});
+
+			var commentsPerCuebin = timeDim.group().reduceCount();
+			var a = commentsPerCuebin.top(commentsPerCuebin.size());
+			for(i=0;i<commentsPerCuebin.size();i++){
+				console.log("There are "+a[i].value+" comments in the "   +a[i].key+" minute of the video" );
+			}
+
+			var minCuebin = timeDim.bottom(1)[0].Cuebin;
+			var maxCuebin = timeDim.top(1)[0].Cuebin;
+
+			var CommentLineChart = dc.lineChart('#commentsPerMinute');
+
+			CommentLineChart.height(400)
+							.width(700)
+							.dimension(timeDim)
+							.group(commentsPerCuebin)
+							.x(d3.scale.linear().domain([minCuebin, maxCuebin]))
+							.xAxisLabel('Time (100 second intervals)')
+							.yAxisLabel('Number of Comments')
+							.brushOn(false)
+
+			var videoDim = ndx.dimension(function(d){
+				return d.VideoName;
+			});
+
+			var commentsPerVideo = videoDim.group().reduceCount();
+
+			var b = commentsPerVideo.top(commentsPerVideo.size());
+			for(j=0;j<commentsPerVideo.size();j++){
+				console.log("There are "+b[j].value+" comments in the "   +b[j].key+" video" );
+			}
+
+			// change this pie chart to a row chart
+			commentPerVideoPie = dc.pieChart("#videoPie");
+			commentPerVideoPie.height(400)
+							  .width(800)
+							  .innerRadius(50)
+							  .renderLabel(false)
+							  //.externalLabels(50)
+							  .externalRadiusPadding(100)
+							  .drawPaths(true)
+							  .dimension(videoDim)
+							  .group(commentsPerVideo)
+							  .legend(dc.legend());
+
+			/*commentPerVideoPie.on('pretransition',function(commentPerVideoPie){
+				commentPerVideoPie.selectAll('.dc-legend-item text')
+								  	.text('')
+								  .append('tspan')
+								  	.text(function(d){return d.name;})
+								  .append('tspan')
+								  	.attr('x',100)
+								  	.attr('text-anchor','end')
+								  	.text(function(d){return d.data;})
+			});*/
+							  				
+
+			dc.renderAll();
+
+
+	}); // end of csv read 
+</script>
+</body>
+</html>
