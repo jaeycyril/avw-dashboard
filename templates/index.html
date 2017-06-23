@@ -23,7 +23,7 @@
  	<div class="col-md-6" id=commentsPerMinute>
  		<p>The quick fox jumped over the lazy dog</p>
  	</div>
- 	<div class="col-md-6" id=videoPie>
+ 	<div class="col-md-6" id=videoRow>
  		<p>The quick fox jumped over the lazy dog</p>
  	</div>
  </div>
@@ -34,6 +34,7 @@
 <script src="{{ url_for('static', filename='lib/js/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/js/crossfilter.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/js/dc.min.js') }}"></script>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main_style.css') }}">
 
 <script>
 	d3.csv("{{ url_for('static', filename='presentation1.csv') }}",function(data){
@@ -69,7 +70,7 @@
 							.x(d3.scale.linear().domain([minCuebin, maxCuebin]))
 							.xAxisLabel('Time (100 second intervals)')
 							.yAxisLabel('Number of Comments')
-							.brushOn(false)
+							.brushOn(true)
 
 			var videoDim = ndx.dimension(function(d){
 				return d.VideoName;
@@ -83,7 +84,7 @@
 			}
 
 			// change this pie chart to a row chart
-			commentPerVideoPie = dc.pieChart("#videoPie");
+			/*commentPerVideoPie = dc.pieChart("#videoPie");
 			commentPerVideoPie.height(400)
 							  .width(800)
 							  .innerRadius(50)
@@ -105,6 +106,17 @@
 								  	.attr('text-anchor','end')
 								  	.text(function(d){return d.data;})
 			});*/
+
+			// row chart
+			commentPerVideoRow = dc.rowChart('#VideoRow');
+			commentPerVideoRow.width(700)
+							  .height(400)
+							  .dimension(videoDim)
+							  .group(commentsPerVideo)
+							  .renderLabel(true)
+							  .rowsCap(16)
+							  .xAxis('Number of comments');
+
 							  				
 
 			dc.renderAll();
