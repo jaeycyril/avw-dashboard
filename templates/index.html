@@ -20,12 +20,8 @@
  </div>
 
  <div class="row">
- 	<div class="col-md-6" id=commentsPerMinute>
- 		<p>The quick fox jumped over the lazy dog</p>
- 	</div>
- 	<div class="col-md-6" id=videoRow>
- 		<p>The quick fox jumped over the lazy dog</p>
- 	</div>
+ 	<div class="col-md-5" id=videoRow></div>
+ 	<div class="col-md-7" id=commentsPerMinute></div>
  </div>
 
 
@@ -37,11 +33,21 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main_style.css') }}">
 
 <script>
-	d3.csv("{{ url_for('static', filename='presentation1.csv') }}",function(data){
+	d3.csv("{{ url_for('static', filename='presentation2.csv') }}",function(data){
+
+			// Get cuepoint and transform to 2d array for clustering lib.
+			var cueArray = [];
+			function make2dCue(cuepoint_value){
+				var twoDPad = [0];
+				twoDPad.push(cuepoint_value);
+				cueArray.push(twoDPad);
+			}
+
 			data.forEach(function(d){
 				d.CommentId = +d.CommentId;
 				d.Cuepoint = +d.Cuepoint;
-				d.Cuebin = +d.Cuebin;
+				make2dCue(d.Cuepoint);
+				d.Cuebin = Math.round(d.Cuepoint/60); // 60 sec bins
 			});
 			//console.log(data[0]);
 
@@ -54,9 +60,9 @@
 
 			var commentsPerCuebin = timeDim.group().reduceCount();
 			var a = commentsPerCuebin.top(commentsPerCuebin.size());
-			for(i=0;i<commentsPerCuebin.size();i++){
+			/*for(i=0;i<commentsPerCuebin.size();i++){
 				console.log("There are "+a[i].value+" comments in the "   +a[i].key+" minute of the video" );
-			}
+			}*/
 
 			var minCuebin = timeDim.bottom(1)[0].Cuebin;
 			var maxCuebin = timeDim.top(1)[0].Cuebin;
@@ -64,12 +70,13 @@
 			var CommentLineChart = dc.lineChart('#commentsPerMinute');
 
 			CommentLineChart.height(400)
-							.width(700)
+							.width(800)
 							.dimension(timeDim)
 							.group(commentsPerCuebin)
 							.x(d3.scale.linear().domain([minCuebin, maxCuebin]))
-							.xAxisLabel('Time (100 second intervals)')
+							.xAxisLabel('Time (minutes)')
 							.yAxisLabel('Number of Comments')
+							.elasticY(true)
 							.brushOn(true)
 
 			var videoDim = ndx.dimension(function(d){
@@ -79,9 +86,9 @@
 			var commentsPerVideo = videoDim.group().reduceCount();
 
 			var b = commentsPerVideo.top(commentsPerVideo.size());
-			for(j=0;j<commentsPerVideo.size();j++){
+			/*for(j=0;j<commentsPerVideo.size();j++){
 				console.log("There are "+b[j].value+" comments in the "   +b[j].key+" video" );
-			}
+			}*/
 
 			// change this pie chart to a row chart
 			/*commentPerVideoPie = dc.pieChart("#videoPie");
@@ -109,7 +116,7 @@
 
 			// row chart
 			commentPerVideoRow = dc.rowChart('#VideoRow');
-			commentPerVideoRow.width(700)
+			commentPerVideoRow.width(600)
 							  .height(400)
 							  .dimension(videoDim)
 							  .group(commentsPerVideo)
@@ -117,7 +124,9 @@
 							  .rowsCap(16)
 							  .xAxis('Number of comments');
 
-							  				
+			
+			// Clustering segment
+			console.log('this is the cueArray :', cueArray); 				
 
 			dc.renderAll();
 
