@@ -4,6 +4,8 @@
 	<title>Hello pages</title>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/bootstrap.min.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/dc.min.css') }}">
+	<script src="{{ url_for('static', 
+	filename='lib/js/machine_learning.min.js') }}"></script>
 </head>
 <body>
 
@@ -24,6 +26,21 @@
  	<div class="col-md-7" id=commentsPerMinute></div>
  </div>
 
+ <div class="row">
+ 	<div class="col-md-3" id=clusterTitle></div>
+ 	<div class="col-md-7" id=clusterBar></div>
+ 	<div class="col-md-2" id=clusterSize>
+ 		<div class="input-group">
+ 			<form action="index.html">
+ 			<input id="user_k" type="number" class="form-control" maxlength="3" placeholder="k">
+ 			<span class="input-group-btn">
+ 				<button class="btn btn-secondary" type="button" id="clusterSubmit">Submit</button>
+ 			</span>
+ 			</form>
+ 		</div>
+ 	</div>
+ </div>
+
 
 <!-- js section -->
 <script src="{{ url_for('static', filename='lib/js/d3.min.js') }}"></script>
@@ -33,9 +50,9 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main_style.css') }}">
 
 <script>
-	d3.csv("{{ url_for('static', filename='presentation2.csv') }}",function(data){
+	d3.csv("{{ url_for('static', filename='presentationComments.csv') }}",function(data){
 
-			// Get cuepoint and transform to 2d array for clustering lib.
+			// Get cuepoint and transform to 2d array for clustering library convenience.
 			var cueArray = [];
 			function make2dCue(cuepoint_value){
 				var twoDPad = [0];
@@ -44,23 +61,63 @@
 			}
 
 			data.forEach(function(d){
-				d.CommentId = +d.CommentId;
-				d.Cuepoint = +d.Cuepoint;
-				make2dCue(d.Cuepoint);
-				d.Cuebin = Math.round(d.Cuepoint/60); // 60 sec bins
+				d.COMMENTID = +d.COMMENTID;
+				d.CUE = +d.CUE;
+				d.VIDEO = d.VIDEO;
+				d.TRIMVIDEO = d.TRIMVIDEO;
+				make2dCue(d.CUE);
+				d.Cuebin = Math.ceil(d.CUE/60); // 60 sec bins
 			});
-			//console.log(data[0]);
+			
 
+			// CLUSTERING SEGMENT ================================================================================
+			
+			// initialize number of clusters
+			var num_k = 2;
+
+			d3.select("#clusterSubmit").on("click",function(){
+				var k = document.getElementById("user_k").value;
+				console.log("this is the user k value :",k);
+			});
+
+				var result = ml.kmeans.cluster({
+					data: cueArray,
+					k: num_k,
+					init_using_data: true,
+					epochs: 500,
+					distance: {type:"euclidean"}
+				});
+
+			// reshape cue centroids to 1 dimension
+				var cueClusters = new Array(cueArray.length);
+
+				for (j=0;j<result.clusters.length;j++){
+					for(k=0;k<result.clusters[j].length;k++){
+						cueClusters[result.clusters[j][k]] = Math.round(result.means[j][1]);
+					}
+					}
+			
+
+			// add cuepoint clusters to data.
+			var count = 0;
+			data.forEach(function(d){
+				d.cueGroups = cueClusters[count];
+				count = count + 1;
+			});
+
+
+			// FILTERING AND CHARTING SEGMENT =======================================================================
 			var ndx = crossfilter(data);
+			console.log("Size of dataset is :",ndx.size());
 
-			// Get cuepoint bins as dimension
+			// Get cuepoint bins as dimension 
 			var timeDim = ndx.dimension(function(d){
 				return d.Cuebin;
 			});
 
 			var commentsPerCuebin = timeDim.group().reduceCount();
-			var a = commentsPerCuebin.top(commentsPerCuebin.size());
-			/*for(i=0;i<commentsPerCuebin.size();i++){
+			/*var a = commentsPerCuebin.top(commentsPerCuebin.size());
+			for(i=0;i<commentsPerCuebin.size();i++){
 				console.log("There are "+a[i].value+" comments in the "   +a[i].key+" minute of the video" );
 			}*/
 
@@ -77,21 +134,58 @@
 							.xAxisLabel('Time (minutes)')
 							.yAxisLabel('Number of Comments')
 							.elasticY(true)
-							.brushOn(true)
+							.brushOn(false);
 
 			var videoDim = ndx.dimension(function(d){
-				return d.VideoName;
+				return d.TRIMVIDEO;
 			});
 
 			var commentsPerVideo = videoDim.group().reduceCount();
 
-			var b = commentsPerVideo.top(commentsPerVideo.size());
-			/*for(j=0;j<commentsPerVideo.size();j++){
-				console.log("There are "+b[j].value+" comments in the "   +b[j].key+" video" );
+			/*var b = commentsPerVideo.top(commentsPerVideo.size());
+			for(j=0;j<commentsPerVideo.size();j++){
+				console.log("There are "+b[j].value+" comments for the "   +b[j].key+" video" );
 			}*/
 
-			// change this pie chart to a row chart
-			/*commentPerVideoPie = dc.pieChart("#videoPie");
+
+			// row chart
+			commentPerVideoRow = dc.rowChart('#VideoRow');
+			commentPerVideoRow.width(600)
+							  .height(400)
+							  .dimension(videoDim)
+							  .group(commentsPerVideo)
+							  .renderLabel(true)
+							  .xAxis('Number of comments');
+
+
+			// Cluster chart =============================================================================================
+			var clusterDim = ndx.dimension(function(d){
+				return d.cueGroups;
+			});
+			var commentsPerCluster = clusterDim.group().reduceCount();
+			
+			clusterBarChart = dc.pieChart('#clusterBar');
+			var minClusterMean = clusterDim.bottom(1)[0].cueGroups;
+			var maxClusterMean = clusterDim.top(1)[0].cueGroups;
+			clusterBarChart.width(600)
+						   .height(400)
+						   //.x(d3.scale.linear().domain([minClusterMean,maxClusterMean]))
+						   .dimension(clusterDim)
+						   .group(commentsPerCluster)
+						   //.elasticY(true)
+
+			dc.renderAll();
+
+
+	}); // end of csv read 
+
+
+
+	/* change this pie chart to a row chart
+	This part is just here to show that i once tried to use a 
+	pie chart but it did not work. Makes for a good report and shit.
+
+			commentPerVideoPie = dc.pieChart("#videoPie");
 			commentPerVideoPie.height(400)
 							  .width(800)
 							  .innerRadius(50)
@@ -103,7 +197,7 @@
 							  .group(commentsPerVideo)
 							  .legend(dc.legend());
 
-			/*commentPerVideoPie.on('pretransition',function(commentPerVideoPie){
+			commentPerVideoPie.on('pretransition',function(commentPerVideoPie){
 				commentPerVideoPie.selectAll('.dc-legend-item text')
 								  	.text('')
 								  .append('tspan')
@@ -113,25 +207,6 @@
 								  	.attr('text-anchor','end')
 								  	.text(function(d){return d.data;})
 			});*/
-
-			// row chart
-			commentPerVideoRow = dc.rowChart('#VideoRow');
-			commentPerVideoRow.width(600)
-							  .height(400)
-							  .dimension(videoDim)
-							  .group(commentsPerVideo)
-							  .renderLabel(true)
-							  .rowsCap(16)
-							  .xAxis('Number of comments');
-
-			
-			// Clustering segment
-			console.log('this is the cueArray :', cueArray); 				
-
-			dc.renderAll();
-
-
-	}); // end of csv read 
 </script>
 </body>
 </html>
