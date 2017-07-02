@@ -1,3 +1,8 @@
 .dc-chart g.row text{
 	fill: black;
 }
+
+h4{
+	color:skyblue;
+	padding-left: 2em
+}

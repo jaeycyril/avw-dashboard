@@ -75,11 +75,8 @@
 			// initialize number of clusters
 			var num_k = 2;
 
-			d3.select("#clusterSubmit").on("click",function(){
-				var k = document.getElementById("user_k").value;
-				console.log("this is the user k value :",k);
-			});
 
+			function run_clustering(num_k){
 				var result = ml.kmeans.cluster({
 					data: cueArray,
 					k: num_k,
@@ -87,8 +84,20 @@
 					epochs: 500,
 					distance: {type:"euclidean"}
 				});
+				return result;
+			}
 
 			// reshape cue centroids to 1 dimension
+				var result = run_clustering(num_k);
+
+				d3.select("#clusterSubmit").on("click",function(){
+				k = document.getElementById("user_k").value;
+				this.result = run_clustering(k);
+				console.log("these are the clusters :",this.result);
+				console.log("this is the user k value :",k);
+				});
+
+				
 				var cueClusters = new Array(cueArray.length);
 
 				for (j=0;j<result.clusters.length;j++){
@@ -96,7 +105,7 @@
 						cueClusters[result.clusters[j][k]] = Math.round(result.means[j][1]);
 					}
 					}
-			
+
 
 			// add cuepoint clusters to data.
 			var count = 0;
