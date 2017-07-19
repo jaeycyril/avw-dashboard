@@ -7,6 +7,12 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main_style.css') }}">
 	<script src="{{ url_for('static', 
 	filename='lib/js/machine_learning.min.js') }}"></script>
+	<style type="text/css">
+		.heat-box{
+			stroke: #000000;
+			stroke-width: 2px;
+		}
+	</style>
 </head>
 <body>
 
@@ -26,16 +32,21 @@
  </div>
 
  <div class="row">
- 	<div class="col-md-7" id=clusterBar style="padding: 5em;">
- 			<h4>K-Clusters by Cues</h4>
+ 	<div class="col-md-5" id=clusterBar style="padding-left: 5em;">
+ 			<h4>K-Clusters by Comments at Cuepoints</h4>
  			<form action="index.html">
  			<input type="number" id="user_k" placeholder="k" style=" width: 3em; height: 2.5em">
  			<button type="button" class="btn btn-info" id="clusterSubmit">Submit</button>
  			</form>
  		</div>
+ 	<div class="col-md-3" id="userPerAspect">
+ 		<h4>User Per Aspect</h4>
  	</div>
- 	<div class="col-md-5" id=clusterSize>
+ 	<div class="col-md-2">
  	</div>
+ </div>
+
+ <div id="commentAspectMatrix" style="margin:3em;">
  </div>
 
 
@@ -72,8 +83,10 @@
 					d.CUE = +d.CUE;
 					d.VIDEO = d.VIDEO;
 					d.TRIMVIDEO = d.TRIMVIDEO;
+					d.TRIMASPECT = d.TRIMASPECT;
 					make2dCue(d.CUE);
 					d.Cuebin = Math.ceil(d.CUE/60); // 60 sec bins
+
 				});
 			}// end get_csv_val
 			
@@ -153,36 +166,87 @@
 
 
 				// row chart
-				commentPerVideoRow = dc.rowChart('#VideoRow');
+				var commentPerVideoRow = dc.rowChart('#VideoRow');
 				commentPerVideoRow.width(600)
 								  .height(400)
 								  .dimension(videoDim)
 								  .group(commentsPerVideo)
 								  .renderLabel(true)
-								  .title('Number of comments')
-								  .renderTitleLabel(true)
 								  .xAxis('Number of comments');
 
 			} // end video_viz
 
 
-			// Cluster chart =============================================================================================
+			// Cluster chart ============================================================================================
 			function cluster_viz(){
 				var clusterDim = ndx.dimension(function(d){
 					return d.cueGroups;
 				});
 				var commentsPerCluster = clusterDim.group().reduceCount();
 				
-				clusterBarChart = dc.pieChart('#clusterBar');
+				var clusterPieChart = dc.pieChart('#clusterBar');
 				var minClusterMean = clusterDim.bottom(1)[0].cueGroups;
 				var maxClusterMean = clusterDim.top(1)[0].cueGroups;
-				clusterBarChart.width(300)
+				clusterPieChart.width(300)
 							   .height(300)
-							   //.x(d3.scale.linear().domain([minClusterMean,maxClusterMean]))
 							   .dimension(clusterDim)
 							   .group(commentsPerCluster)
-							   //.elasticY(true)
+							   .innerRadius(50);
 			} // end cluster_viz
+
+
+			function aspect_viz(){
+				var aspectDim = ndx.dimension(function(d){
+					return d.ASPECT;
+				});
+				var userPerAspect = aspectDim.group().reduceCount(function(d){
+					return d.COMMENTATOR;
+				});
+
+				var userPerAspectRow = dc.rowChart('#userPerAspect');
+
+				var minAspectUser = aspectDim.bottom(1)[0].ASPECT;
+				var maxAspectUser = aspectDim.top(1)[0].ASPECT;
+
+				userPerAspectRow.width(300)
+								 .height(400)
+								 .dimension(aspectDim)
+								 .group(userPerAspect)
+								 //.x(d3.scale.linear().domain([minAspectUser,maxAspectUser]))
+			} // end aspect viz
+
+			function aspectMatrix(){
+				var commentatorAspectDim = ndx.dimension(function(d){
+					return [d.TRIMASPECT, d.COMMENTATOR];
+				});
+				var commentatorAspectCount = commentatorAspectDim.group().reduceCount();
+				var colorScale = d3.scale.linear()
+										 .domain([0,10])
+										 .range(["red","blue"]);
+				var aspectHeatMap = dc.heatMap("#commentAspectMatrix");
+
+				aspectHeatMap.width(1400)
+							 .height(400)
+							 .dimension(commentatorAspectDim)
+							 .group(commentatorAspectCount)
+							 .keyAccessor(function(d){ return d.key[0]; })
+							 .valueAccessor(function(d){ return d.key[1]; })
+							 .colorAccessor(function(d){
+							 	console.log(d.key[0]+" "+d.key[1]+" "+d.value); 
+							 	return d.value;
+							 })
+							 .colors(["#d5f9ef","#02addf","#003a89","#000"])
+							 .calculateColorDomain()
+							 .xBorderRadius(0)
+							 .yBorderRadius(0)
+							 .title(function(d){
+							 	return "Student id: " + d.key[1] + "\n"+
+							 		   "Aspect: " + d.key[0] + "\n" +
+							 		   "Student used this aspect " + d.value + " time(s) \n"
+							 });
+
+			} // end aspectMatrix
+
 
 			function render_charts(){
 				dc.renderAll();
@@ -193,12 +257,14 @@
 			function run_page(){
 				get_csv_vals();
 				run_clustering();
-				reshape_cue();
-				add_cue_clusters();
+				//reshape_cue();
+				//add_cue_clusters();
 				init_crossfilter();
 				cue_bin_viz();
 				video_viz();
-				cluster_viz();
+				//cluster_viz();
+				//aspect_viz();
+				aspectMatrix();
 				render_charts();
 			}
 
