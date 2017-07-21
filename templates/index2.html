@@ -23,11 +23,11 @@
 </nav>
 
  <div class="row">
- 	<div class="col-md-5" id=videoRow>
- 		<h4>Comments Per Video</h4>
- 	</div>
  	<div class="col-md-7" id=commentsPerMinute>
  		<h4>Comments per minute</h4>
+ 	</div>
+ 	<div class="col-md-5" id=videoRow>
+ 		<h4>Comments Per Video</h4>
  	</div>
  </div>
 
@@ -48,18 +48,84 @@
 
  <div id="commentAspectMatrix" style="margin:3em;">
  </div>
+ <div class=row id="selectStud" style="margin:3em">
+ 	<div class="col-xs-1">
+ 		<select class="selectpicker show-menu-arrow" title="Choose a student" id="selectStudent">
+ 			<option>LstudyID599</option>
+ 			<option>UCW2</option>
+			<option>UCW4</option>
+			<option>UCW5</option>
+			<option>UCW6</option>
+			<option>UCW7</option>
+			<option>UCW8</option>
+			<option>UCW9</option>
+			<option>UCW10</option>
+			<option>UCW11</option>
+			<option>UCW12</option>
+			<option>UCW15</option>
+			<option>UCT18</option>
+			<option>UCT19</option>
+			<option>UCT20</option>
+			<option>UCT21</option>
+			<option>UCT24</option>
+			<option>UCT25</option>
+			<option>UCT26</option>
+			<option>UCT27</option>
+			<option>UCF29</option>
+			<option>UCF31</option>
+			<option>UCM33</option>
+			<option>UCM34</option>
+			<option>UCT37</option>
+			<option>UCT38</option>
+			<option>UCT39</option>
+			<option>LstudyID209</option>
+			<option>LstudyID912</option>
+			<option>LstudyID855</option>
+			<option>LstudyID599</option>
+			<option>LstudyID030</option>
+			<option>LstudyID732</option>
+			<option>LstudyID636</option>
+			<option>LstudyID514</option>
+			<option>LstudyID242</option>
+			<option>UCW13</option>
+			<option>LstudyID491</option>
+			<option>UCT23</option>
+ 		</select>
+ 	</div>
+ 	<div class="col-xs-1">
+ 		<select class="selectpicker" title="choose a course" id="selectVid">
+ 			<option>TUTORIAL 1</option>
+ 			<option>TUTORIAL 2</option>
+ 			<option>TUTORIAL 3</option>
+ 			<option>TUTORIAL 4</option>
+ 			<option>EXAMPLE 1</option>
+ 			<option>EXAMPLE 2</option>
+ 			<option>EXAMPLE 3</option>
+ 			<option>EXAMPLE 4</option>
+ 		</select>
+ 	</div>
+ 	<div class="col-xs-1">
+ 	<button type="button" class="btn btn-info" id="sentiSubmit">Submit</button>
+ 	</div>
+ 	<div class="col-xs-7" id=sentiplot></div>
+ </div>
+ <div class="container" id="tester"></div>
 
 
 <!-- js section -->
 <script src="{{ url_for('static', filename='lib/js/d3.min.js') }}"></script>
-<script src="{{ url_for('static', filename='lib/js/jquery.min.js') }}"></script>
+<!--<script src="{{ url_for('static', filename='lib/js/jquery.min.js') }}"></script>-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 <script src="{{ url_for('static', filename='lib/js/crossfilter.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/js/dc.min.js') }}"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 
 <script>
 	d3.csv("{{ url_for('static', filename='presentationComments.csv') }}",function(data){
 
+			//initialize crossfilter data holder
+			var ndx;
 
 			// initialize number of clusters
 			var num_k = 2;
@@ -69,13 +135,16 @@
 
 			var cueClusters = new Array(cueArray.length);
 			var result;
-			var ndx;
 
 			function make2dCue(cuepoint_value){
 				var twoDPad = [0];
 				twoDPad.push(cuepoint_value);
 				cueArray.push(twoDPad);
 			}
+
+			// initialize selection for sentiment analysis
+			var selectedStudent;
+			var selectedVid;
 
 			function get_csv_vals(){
 				data.forEach(function(d){
@@ -232,7 +301,7 @@
 							 .keyAccessor(function(d){ return d.key[0]; })
 							 .valueAccessor(function(d){ return d.key[1]; })
 							 .colorAccessor(function(d){
-							 	console.log(d.key[0]+" "+d.key[1]+" "+d.value); 
+							 	//console.log(d.key[0]+" "+d.key[1]+" "+d.value); 
 							 	return d.value;
 							 })
 							 .colors(["#d5f9ef","#02addf","#003a89","#000"])
@@ -246,6 +315,82 @@
 							 });
 
 			} // end aspectMatrix
+
+			/*TESTER = document.getElementById('tester');
+			Plotly.plot( TESTER, [{
+			x: [1, 2, 3, 4, 5],
+			y: [1, 2, 4, 8, 16] }], {
+			margin: { t: 0 } } );*/
+
+			function sentimentChart(sendata){
+				var cueX = [];
+				var sentimentY = [];
+				sendata["documents"].forEach(function(d){
+					cueX.push(d.id);
+					sentimentY.push(d.score);
+				});
+
+				var line1 = [
+					{
+					x: cueX,
+					y: sentimentY,
+					type: 'bar'
+						}
+					];
+
+				/*var line2 = {
+					x: cueX,
+					y: [0.5,0.5,0.5],
+					type: 'scatter'
+				};*/
+
+				Plotly.newPlot('tester',line1,);
+			}
+
+
+			function sentimentCall(){
+				// prepare filtered rows of text in AZURE format
+				var key1 = "9b4b7fa05c594e5f918dffec08b93f01";
+				var key2 = "6bbd5234a15d4c89a413707d0c7976bb";
+				var doc = [];
+				var comments = {"documents":doc};
+
+				data.forEach(function(d){
+					if((d.COMMENTATOR == selectedStudent) && (d.VIDEO == selectedVid)){
+						var singleComment = {};
+						singleComment["id"] = d.CUE;
+						singleComment["text"] = d.TEXT;
+						doc.push(singleComment);
+					}
+				});
+				comments = JSON.stringify(comments);
+				// Make call to Azure Service (This code snippet was shared on the Azure site below. Accessed 20/7/2017)
+				// https://westus.dev.cognitive.microsoft.com/docs/services/TextAnalytics.V2.0/operations/56f30ceeeda5650db055a3c9
+
+				$(function() {
+        				var params = {
+            			// Request parameters
+        				};
+					$.ajax({
+	            		url: "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment?" + $.param(params),
+	            		beforeSend: function(xhrObj){
+	             			xhrObj.setRequestHeader("Content-Type","application/json");
+	                		xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key",key1);
+	            			},
+	            		type: "POST",
+	            		// Request body
+	            		data: comments,
+	            		dataType:"json"
+	        			})
+	        		.done(function(d){
+	        			sentimentChart(d);
+	        		})
+	        		.fail(function() {
+	            		alert("error");
+	        			});
+	    			});
+			} // end sentimentCall
+
 
 
 			function render_charts(){
@@ -274,6 +419,17 @@
 				num_k = document.getElementById("user_k").value;
 				run_page();
 				});
+
+			// Getting user input for sentiment analysis
+			d3.select("#sentiSubmit").on("click",function(){
+				var selectStudent = document.getElementById("selectStudent");
+				selectedStudent = selectStudent.options[selectStudent.selectedIndex].value;
+
+				var selectVid = document.getElementById("selectVid");
+				selectedVid = selectVid.options[selectVid.selectedIndex].value;
+
+				sentimentCall();
+			});
 
 	}); // end of csv read 
 
