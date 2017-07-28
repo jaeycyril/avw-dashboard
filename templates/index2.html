@@ -22,16 +22,19 @@
     </div>
 </nav>
 
- <div class="row">
- 	<div class="col-md-7" id=commentsPerMinute>
+ <div class="row" style="border-bottom: solid skyblue thin">
+ 	<div class="col-md-5" id=commentsPerMinute>
  		<h4>Comments per minute</h4>
  	</div>
- 	<div class="col-md-5" id=videoRow>
- 		<h4>Comments Per Video</h4>
+ 	<div class="col-md-3" id=videoRow>
+ 		<h4>Comments Per Video <small><a href='#' id="vidReset">reset</a></small></h4>
+ 	</div>
+ 	<div class="col-md-4" id="commentatorRow">
+ 		<h4>Comments Per Student</h4>
  	</div>
  </div>
 
- <div class="row">
+<!-- <div class="row">
  	<div class="col-md-5" id=clusterBar style="padding-left: 5em;">
  			<h4>K-Clusters by Comments at Cuepoints</h4>
  			<form action="index.html">
@@ -44,11 +47,13 @@
  	</div>
  	<div class="col-md-2">
  	</div>
- </div>
+ </div>-->
 
- <div id="commentAspectMatrix" style="margin:3em;">
+ <div id="commentAspectMatrix" style="margin:3em; border-bottom: solid skyblue thin">
+ <h4>Student interaction with aspects</h4>
  </div>
  <div class=row id="selectStud" style="margin:3em">
+ 	<h4>Student sentiment per video</h4>
  	<div class="col-xs-1">
  		<select class="selectpicker show-menu-arrow" title="Choose a student" id="selectStudent">
  			<option>LstudyID599</option>
@@ -200,30 +205,91 @@
 
 			// Get cuepoint bins as dimension 
 			function cue_bin_viz(){
-				var timeDim = ndx.dimension(function(d){
+				var cueDim = ndx.dimension(function(d){
 					return d.Cuebin;
 				});
 
-				var commentsPerCuebin = timeDim.group().reduceCount();
-				
+				function groupVid(videoName){
+					var vid_by_cue = cueDim.group().reduceSum(function(d){
+					if(d.TRIMVIDEO==videoName){
+						return 1
+					}else{
+						return 0
+					}
+					});
+					return vid_by_cue;
+				}
 
-				var minCuebin = timeDim.bottom(1)[0].Cuebin;
-				var maxCuebin = timeDim.top(1)[0].Cuebin;
+				var ex1 = groupVid("EXAMPLE 1");
+				var ex2 = groupVid("EXAMPLE 2");
+				var ex3 = groupVid("EXAMPLE 3");
+				var ex4 = groupVid("EXAMPLE 4");
+				var tut1 = groupVid("TUTORIAL 1");
+				var tut2 = groupVid("TUTORIAL 2");
+				var tut3 = groupVid("TUTORIAL 3");
+				var tut4 = groupVid("TUTORIAL 4");
 
-				var CommentLineChart = dc.lineChart('#commentsPerMinute');
 
-				CommentLineChart.height(400)
-								.width(800)
-								.dimension(timeDim)
-								.group(commentsPerCuebin)
-								.x(d3.scale.linear().domain([minCuebin, maxCuebin]))
-								.xAxisLabel('Time (minutes)')
-								.yAxisLabel('Number of Comments')
-								.elasticY(true)
-								.brushOn(false);
+				var compositeChart = dc.compositeChart('#commentsPerMinute');
+
+				compositeChart
+			        .width(600)
+			        .height(400)
+			        .x(d3.scale.linear().domain([0,10]))
+			        .yAxisLabel("Number of comments")
+			        .xAxisLabel("Time (Minutes)")
+			        .legend(dc.legend().x(500).y(20).itemHeight(13).gap(5))
+			        .renderHorizontalGridLines(true)
+			        .elasticX(true)
+			        .elasticY(true)
+			        .title(function(d){return "minute: "+d.key+"\n"+"Number of comments: "+d.value+"";})
+			        .compose([
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#7fc97f')
+			                .group(ex1, "EXAMPLE 1")
+			                .dashStyle([2,2]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#beaed4')
+			                .group(ex2, "EXAMPLE 2")
+			                .dashStyle([5,5]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#fdc086')
+			                .group(ex3, "EXAMPLE 3")
+			                .dashStyle([10,10]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#80b1d3')
+			                .group(ex4, "EXAMPLE 4")
+			                .dashStyle([15,15]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#386cb0')
+			                .group(tut1, "TUTORIAL 1")
+			                .dashStyle([20,20]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#f0027f')
+			                .group(tut2, "TUTORIAL 2")
+			                .dashStyle([20,2]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#bf5b17')
+			                .group(tut3, "TUTORIAL 3")
+			                .dashStyle([10,5]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#666666')
+			                .group(tut4, "TUTORIAL 4")
+			                .dashStyle([15,2,2]),
+			            ])
+			        .brushOn(false)
+
+				//cueDim.filterAll();
 
 			} //end cue_bin_viz
-
 
 			function video_viz(){
 				var videoDim = ndx.dimension(function(d){
@@ -236,14 +302,35 @@
 
 				// row chart
 				var commentPerVideoRow = dc.rowChart('#VideoRow');
-				commentPerVideoRow.width(600)
+				commentPerVideoRow.width(400)
 								  .height(400)
 								  .dimension(videoDim)
 								  .group(commentsPerVideo)
-								  .renderLabel(true)
-								  .xAxis('Number of comments');
+								  .title(function(d){
+								  	return d.key+": "+d.value+" comments";
+								  });
 
 			} // end video_viz
+
+			function commentatorViz(){
+				var commentatorDim = ndx.dimension(function(d){
+					return d.COMMENTATOR;
+				});
+
+				var commentsPerCommentator = commentatorDim.group().reduceCount();
+
+				var commentsPerCommentatorRow = dc.rowChart('#commentatorRow');
+				commentsPerCommentatorRow.width(400)
+										 .height(400)
+										 .dimension(commentatorDim)
+										 .group(commentsPerCommentator)
+										 .elasticX(true)
+										 .colors('skyblue')
+										 .title(function(d){
+										 	return "student: "+d.key+"\n"+
+										 		   "Total comments: "+d.value;
+										 });
+			} // end commentatorViz
 
 
 			// Cluster chart ============================================================================================
@@ -325,18 +412,18 @@
 			function sentimentChart(sendata){
 				var cueX = [];
 				var sentimentY = [];
+				console.log(sendata);
 				sendata["documents"].forEach(function(d){
 					cueX.push(d.id);
 					sentimentY.push(d.score);
 				});
 
-				var line1 = [
-					{
+				var line1 = 
+					[{
 					x: cueX,
 					y: sentimentY,
 					type: 'bar'
-						}
-					];
+						}];
 
 				/*var line2 = {
 					x: cueX,
@@ -407,6 +494,7 @@
 				init_crossfilter();
 				cue_bin_viz();
 				video_viz();
+				commentatorViz()
 				//cluster_viz();
 				//aspect_viz();
 				aspectMatrix();
@@ -430,6 +518,27 @@
 
 				sentimentCall();
 			});
+
+			d3.select("#vidReset").on("click",function(){
+				commentsPerVideoRow.filterAll();
+				dc.redrawAll()
+			});
+
+
+			/*
+			ORDINAL BAR CHART
+				bar1
+                .width(800)
+                .height(250)
+                .dimension(weekday)
+                .x(d3.scale.ordinal().domain(["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]))
+                .xUnits(dc.units.ordinal)
+                .group(ordersByWD)
+                .y(d3.scale.linear().domain([0, 3200]))
+                .margins({top: 20, right: 30, bottom: 50, left: 80})
+                .label(function(d) { return d.value})
+                ;
+			*/
 
 	}); // end of csv read 
 
