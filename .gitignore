@@ -62,4 +62,4 @@ ENV/
 .mypy_cache/
 
 # data file
-.csv
+*.csv
