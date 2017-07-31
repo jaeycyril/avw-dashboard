@@ -2,10 +2,15 @@
 <html>
 <head>
 	<title>Hello pages</title>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/bootstrap.min.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/dc.min.css') }}">
-	<script src="{{ url_for('static', 
-	filename='lib/js/machine_learning.min.js') }}"></script>
+	<link rel="stylesheet" type="text/css" href="/static/lib/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/lib/css/dc.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/main_style.css">
+	<style type="text/css">
+		.heat-box{
+			stroke: #000000;
+			stroke-width: 2px;
+		}
+	</style>
 </head>
 <body>
 
@@ -15,207 +20,482 @@
     </div>
 </nav>
 
- <div class="row">
- <div class="col-md-12">
- 	<h1>Boss babyin'</h1>
- </div>
- </div>
-
- <div class="row">
- 	<div class="col-md-5" id=videoRow></div>
- 	<div class="col-md-7" id=commentsPerMinute></div>
- </div>
-
- <div class="row">
- 	<div class="col-md-3" id=clusterTitle></div>
- 	<div class="col-md-7" id=clusterBar></div>
- 	<div class="col-md-2" id=clusterSize>
- 		<div class="input-group">
- 			<form action="index.html">
- 			<input id="user_k" type="number" class="form-control" maxlength="3" placeholder="k">
- 			<span class="input-group-btn">
- 				<button class="btn btn-secondary" type="button" id="clusterSubmit">Submit</button>
- 			</span>
- 			</form>
- 		</div>
+ <div class="row" style="border-bottom: solid skyblue thin">
+ 	<div class="col-md-5" id=commentsPerMinute>
+ 		<h4>Comments per minute</h4>
+ 	</div>
+ 	<div class="col-md-3" id=videoRow>
+ 		<h4>Comments Per Video <small><a href='#' id="vidReset">reset</a></small></h4>
+ 	</div>
+ 	<div class="col-md-4" id="commentatorRow">
+ 		<h4>Comments Per Student</h4>
  	</div>
  </div>
 
+ <div id="commentAspectMatrix" style="margin:3em; border-bottom: solid skyblue thin">
+ <h4>Student interaction with aspects</h4>
+ </div>
+
+
+ <div class=row id="selectStud" style="margin:3em">
+ 	<h4>Student sentiment per video</h4>
+ 	<div class="col-xs-1">
+ 		<select class="selectpicker show-menu-arrow" title="Choose a student" id="selectStudent">
+ 			<option>LstudyID599</option>
+ 			<option>UCW2</option>
+			<option>UCW4</option>
+			<option>UCW5</option>
+			<option>UCW6</option>
+			<option>UCW7</option>
+			<option>UCW8</option>
+			<option>UCW9</option>
+			<option>UCW10</option>
+			<option>UCW11</option>
+			<option>UCW12</option>
+			<option>UCW15</option>
+			<option>UCT18</option>
+			<option>UCT19</option>
+			<option>UCT20</option>
+			<option>UCT21</option>
+			<option>UCT24</option>
+			<option>UCT25</option>
+			<option>UCT26</option>
+			<option>UCT27</option>
+			<option>UCF29</option>
+			<option>UCF31</option>
+			<option>UCM33</option>
+			<option>UCM34</option>
+			<option>UCT37</option>
+			<option>UCT38</option>
+			<option>UCT39</option>
+			<option>LstudyID209</option>
+			<option>LstudyID912</option>
+			<option>LstudyID855</option>
+			<option>LstudyID599</option>
+			<option>LstudyID030</option>
+			<option>LstudyID732</option>
+			<option>LstudyID636</option>
+			<option>LstudyID514</option>
+			<option>LstudyID242</option>
+			<option>UCW13</option>
+			<option>LstudyID491</option>
+			<option>UCT23</option>
+ 		</select>
+ 	</div>
+ 	<div class="col-xs-1">
+ 		<select class="selectpicker" title="choose a course" id="selectVid">
+ 			<option>TUTORIAL 1</option>
+ 			<option>TUTORIAL 2</option>
+ 			<option>TUTORIAL 3</option>
+ 			<option>TUTORIAL 4</option>
+ 			<option>EXAMPLE 1</option>
+ 			<option>EXAMPLE 2</option>
+ 			<option>EXAMPLE 3</option>
+ 			<option>EXAMPLE 4</option>
+ 		</select>
+ 	</div>
+ 	<div class="col-xs-1">
+ 	<button type="button" class="btn btn-info" id="sentiSubmit">Submit</button>
+ 	</div>
+ 	</div>
+ 	<div class="container" id=sentiplot></div>
+	<div class="container" id="rateBubble"></div>
+	<div class="container" id="bubbleRange"></div>
 
 <!-- js section -->
-<script src="{{ url_for('static', filename='lib/js/d3.min.js') }}"></script>
-<script src="{{ url_for('static', filename='lib/js/jquery.min.js') }}"></script>
-<script src="{{ url_for('static', filename='lib/js/crossfilter.min.js') }}"></script>
-<script src="{{ url_for('static', filename='lib/js/dc.min.js') }}"></script>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main_style.css') }}">
-
+<script src="/static/lib/js/d3.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="/static/lib/js/crossfilter.min.js"></script>
+<script src="/static/lib/js/dc.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-	d3.csv("{{ url_for('static', filename='presentationComments.csv') }}",function(data){
+		d3.csv("/static/presentationFinal.csv",function(data){
 
-			// Get cuepoint and transform to 2d array for clustering library convenience.
-			var cueArray = [];
-			function make2dCue(cuepoint_value){
-				var twoDPad = [0];
-				twoDPad.push(cuepoint_value);
-				cueArray.push(twoDPad);
-			}
+			//initialize crossfilter data holder
+			var ndx;
 
-			data.forEach(function(d){
-				d.COMMENTID = +d.COMMENTID;
-				d.CUE = +d.CUE;
-				d.VIDEO = d.VIDEO;
-				d.TRIMVIDEO = d.TRIMVIDEO;
-				make2dCue(d.CUE);
-				d.Cuebin = Math.ceil(d.CUE/60); // 60 sec bins
-			});
-			
+			function get_csv_vals(){
+				data.forEach(function(d){
+					d.COMMENTID = +d.COMMENTID;
+					d.CUE = +d.CUE;
+					d.TRIMVIDEO = d.TRIMVIDEO;
+					d.TRIMASPECT = d.TRIMASPECT;
+					d.Sum = +d.Sum;
+					d.TLSum = +d.TLSum;
+					d.Cuebin = Math.ceil(d.CUE/60); // 60 sec bins
 
-			// CLUSTERING SEGMENT ================================================================================
-			
-			// initialize number of clusters
-			var num_k = 2;
-
-
-			function run_clustering(num_k){
-				var result = ml.kmeans.cluster({
-					data: cueArray,
-					k: num_k,
-					init_using_data: true,
-					epochs: 500,
-					distance: {type:"euclidean"}
 				});
-				return result;
-			}
-
-			// reshape cue centroids to 1 dimension
-				var result = run_clustering(num_k);
-
-				d3.select("#clusterSubmit").on("click",function(){
-				k = document.getElementById("user_k").value;
-				this.result = run_clustering(k);
-				console.log("these are the clusters :",this.result);
-				console.log("this is the user k value :",k);
-				});
-
-				
-				var cueClusters = new Array(cueArray.length);
-
-				for (j=0;j<result.clusters.length;j++){
-					for(k=0;k<result.clusters[j].length;k++){
-						cueClusters[result.clusters[j][k]] = Math.round(result.means[j][1]);
-					}
-					}
-
-
-			// add cuepoint clusters to data.
-			var count = 0;
-			data.forEach(function(d){
-				d.cueGroups = cueClusters[count];
-				count = count + 1;
-			});
+			}// end get_csv_val
 
 
 			// FILTERING AND CHARTING SEGMENT =======================================================================
-			var ndx = crossfilter(data);
-			console.log("Size of dataset is :",ndx.size());
+			function init_crossfilter(){
+				ndx = crossfilter(data);
+				console.log("Size of dataset is :",ndx.size());
+			} // end init_crossfilter
 
 			// Get cuepoint bins as dimension 
-			var timeDim = ndx.dimension(function(d){
-				return d.Cuebin;
-			});
+			function cue_bin_viz(){
+				var cueDim = ndx.dimension(function(d){
+					return d.Cuebin;
+				});
 
-			var commentsPerCuebin = timeDim.group().reduceCount();
-			/*var a = commentsPerCuebin.top(commentsPerCuebin.size());
-			for(i=0;i<commentsPerCuebin.size();i++){
-				console.log("There are "+a[i].value+" comments in the "   +a[i].key+" minute of the video" );
-			}*/
+				function groupVid(videoName){
+					var vid_by_cue = cueDim.group().reduceSum(function(d){
+					if(d.TRIMVIDEO==videoName){
+						return 1
+					}else{
+						return 0
+					}
+					});
+					return vid_by_cue;
+				}
 
-			var minCuebin = timeDim.bottom(1)[0].Cuebin;
-			var maxCuebin = timeDim.top(1)[0].Cuebin;
-
-			var CommentLineChart = dc.lineChart('#commentsPerMinute');
-
-			CommentLineChart.height(400)
-							.width(800)
-							.dimension(timeDim)
-							.group(commentsPerCuebin)
-							.x(d3.scale.linear().domain([minCuebin, maxCuebin]))
-							.xAxisLabel('Time (minutes)')
-							.yAxisLabel('Number of Comments')
-							.elasticY(true)
-							.brushOn(false);
-
-			var videoDim = ndx.dimension(function(d){
-				return d.TRIMVIDEO;
-			});
-
-			var commentsPerVideo = videoDim.group().reduceCount();
-
-			/*var b = commentsPerVideo.top(commentsPerVideo.size());
-			for(j=0;j<commentsPerVideo.size();j++){
-				console.log("There are "+b[j].value+" comments for the "   +b[j].key+" video" );
-			}*/
+				var ex1 = groupVid("EXAMPLE 1");
+				var ex2 = groupVid("EXAMPLE 2");
+				var ex3 = groupVid("EXAMPLE 3");
+				var ex4 = groupVid("EXAMPLE 4");
+				var tut1 = groupVid("TUTORIAL 1");
+				var tut2 = groupVid("TUTORIAL 2");
+				var tut3 = groupVid("TUTORIAL 3");
+				var tut4 = groupVid("TUTORIAL 4");
 
 
-			// row chart
-			commentPerVideoRow = dc.rowChart('#VideoRow');
-			commentPerVideoRow.width(600)
-							  .height(400)
-							  .dimension(videoDim)
-							  .group(commentsPerVideo)
-							  .renderLabel(true)
-							  .xAxis('Number of comments');
+				var compositeChart = dc.compositeChart('#commentsPerMinute');
+
+				compositeChart
+			        .width(600)
+			        .height(400)
+			        .x(d3.scale.linear().domain([0,10]))
+			        .yAxisLabel("Number of comments")
+			        .xAxisLabel("Time (Minutes)")
+			        .legend(dc.legend().x(500).y(20).itemHeight(13).gap(5))
+			        .renderHorizontalGridLines(true)
+			        .elasticX(true)
+			        .elasticY(true)
+			        .title(function(d){return "minute: "+d.key+"\n"+"Number of comments: "+d.value+"";})
+			        .compose([
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#7fc97f')
+			                .group(ex1, "EXAMPLE 1")
+			                .dashStyle([2,2]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#beaed4')
+			                .group(ex2, "EXAMPLE 2")
+			                .dashStyle([5,5]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#fdc086')
+			                .group(ex3, "EXAMPLE 3")
+			                .dashStyle([10,10]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#80b1d3')
+			                .group(ex4, "EXAMPLE 4")
+			                .dashStyle([15,15]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#386cb0')
+			                .group(tut1, "TUTORIAL 1")
+			                .dashStyle([20,20]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#f0027f')
+			                .group(tut2, "TUTORIAL 2")
+			                .dashStyle([20,2]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#bf5b17')
+			                .group(tut3, "TUTORIAL 3")
+			                .dashStyle([10,5]),
+			            dc.lineChart(compositeChart)
+			                .dimension(cueDim)
+			                .colors('#666666')
+			                .group(tut4, "TUTORIAL 4")
+			                .dashStyle([15,2,2]),
+			            ])
+			        .brushOn(false)
+
+				//cueDim.filterAll();
+
+			} //end cue_bin_viz
+
+			function video_viz(){
+				var videoDim = ndx.dimension(function(d){
+					return d.TRIMVIDEO;
+				});
+
+				var commentsPerVideo = videoDim.group().reduceCount();
 
 
-			// Cluster chart =============================================================================================
-			var clusterDim = ndx.dimension(function(d){
-				return d.cueGroups;
-			});
-			var commentsPerCluster = clusterDim.group().reduceCount();
+
+				// row chart
+				var commentPerVideoRow = dc.rowChart('#VideoRow');
+				commentPerVideoRow.width(400)
+								  .height(400)
+								  .dimension(videoDim)
+								  .group(commentsPerVideo)
+								  .title(function(d){
+								  	return d.key+": "+d.value+" comments";
+								  });
+
+			} // end video_viz
+
+			function commentatorViz(){
+				var commentatorDim = ndx.dimension(function(d){
+					return d.COMMENTATOR;
+				});
+
+				var commentsPerCommentator = commentatorDim.group().reduceCount();
+
+				var commentsPerCommentatorRow = dc.rowChart('#commentatorRow');
+				commentsPerCommentatorRow.width(400)
+										 .height(400)
+										 .dimension(commentatorDim)
+										 .group(commentsPerCommentator)
+										 .elasticX(true)
+										 .colors('skyblue')
+										 .title(function(d){
+										 	return "student: "+d.key+"\n"+
+										 		   "Total comments: "+d.value;
+										 });
+			} // end commentatorViz
+
+
+			function aspectMatrix(){
+				var commentatorAspectDim = ndx.dimension(function(d){
+					return [d.TRIMASPECT, d.COMMENTATOR];
+				});
+				var commentatorAspectCount = commentatorAspectDim.group().reduceCount();
+				var colorScale = d3.scale.linear()
+										 .domain([0,10])
+										 .range(["red","blue"]);
+				var aspectHeatMap = dc.heatMap("#commentAspectMatrix");
+
+				aspectHeatMap.width(1400)
+							 .height(400)
+							 .dimension(commentatorAspectDim)
+							 .group(commentatorAspectCount)
+							 .keyAccessor(function(d){ return d.key[0]; })
+							 .valueAccessor(function(d){ return d.key[1]; })
+							 .colorAccessor(function(d){
+							 	//console.log(d.key[0]+" "+d.key[1]+" "+d.value); 
+							 	return d.value;
+							 })
+							 .colors(["#d5f9ef","#02addf","#003a89","#000"])
+							 .calculateColorDomain()
+							 .xBorderRadius(0)
+							 .yBorderRadius(0)
+							 .title(function(d){
+							 	return "Student id: " + d.key[1] + "\n"+
+							 		   "Aspect: " + d.key[0] + "\n" +
+							 		   "Student used this aspect " + d.value + " time(s) \n"
+							 });
+
+			} // end aspectMatrix
+
+
+			function sentimentChart(sendata){
+				var cueX = [];
+				var sentimentY = [];
+				console.log(sendata);
+				sendata["documents"].forEach(function(d){
+					cueX.push(d.id);
+					// change sentiment range from [0,1] to [-1,1]
+					var newSentiRange = (d.score * 2) - 1;
+					console.log(newSentiRange);
+					sentimentY.push(newSentiRange);
+				});
+
+				var line1 = 
+					[{
+					x: cueX,
+					y: sentimentY,
+					type: 'bar'
+						}];
+
+				var layout = {
+					title: 'Sentiment Plot',
+					xaxis: {
+					  	title: 'Time of comment (seconds)',
+					    titlefont: {
+					      family: 'Calibri sans serif',
+					      size: 14,
+					      color: 'black'
+					    }
+					},
+					yaxis: {
+					  	title: 'Sentiment polarity (-1 to 1)',
+					    titlefont: {
+					      family: 'Calibri sans serif',
+					      size: 14,
+					      color: 'black'
+					    }
+					}
+				};
+
+				Plotly.newPlot('sentiplot',line1, layout);
+			} // end sentiment plot
+
+
+			// initialize selection for sentiment analysis
+			var selectedStudent;
+			var selectedVid;
+
+			function sentimentCall(){
+				// prepare filtered rows of text in AZURE format
+				var key1 = "9b4b7fa05c594e5f918dffec08b93f01";
+				var key2 = "6bbd5234a15d4c89a413707d0c7976bb";
+				var doc = [];
+				var comments = {"documents":doc};
+
+				data.forEach(function(d){
+					if((d.COMMENTATOR == selectedStudent) && (d.TRIMVIDEO == selectedVid)){
+						var singleComment = {};
+						singleComment["id"] = d.CUE;
+						singleComment["text"] = d.TEXT;
+						doc.push(singleComment);
+					}
+				});
+				comments = JSON.stringify(comments);
+				// Make call to Azure Service (This code snippet was shared on the Azure site below. Accessed 20/7/2017)
+				// https://westus.dev.cognitive.microsoft.com/docs/services/TextAnalytics.V2.0/operations/56f30ceeeda5650db055a3c9
+
+				$(function() {
+        				var params = {
+            			// Request parameters
+        				};
+					$.ajax({
+	            		url: "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment?" + $.param(params),
+	            		beforeSend: function(xhrObj){
+	             			xhrObj.setRequestHeader("Content-Type","application/json");
+	                		xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key",key1);
+	            			},
+	            		type: "POST",
+	            		// Request body
+	            		data: comments,
+	            		dataType:"json"
+	        			})
+	        		.done(function(d){
+	        			sentimentChart(d);
+	        		})
+	        		.fail(function() {
+	            		alert("error");
+	        			});
+	    			});
+			} // end sentimentCall
+
 			
-			clusterBarChart = dc.pieChart('#clusterBar');
-			var minClusterMean = clusterDim.bottom(1)[0].cueGroups;
-			var maxClusterMean = clusterDim.top(1)[0].cueGroups;
-			clusterBarChart.width(600)
-						   .height(400)
-						   //.x(d3.scale.linear().domain([minClusterMean,maxClusterMean]))
-						   .dimension(clusterDim)
-						   .group(commentsPerCluster)
-						   //.elasticY(true)
+			function ratingChart(){
+				var bubDim = ndx.dimension(function(d){
+					return d.COMMENTATOR;
+				});
 
-			dc.renderAll();
+				var ratingByComment = bubDim.group().reduce(
+						function (p,v){
+							++p.count;
+							p.sum += v.Sum;
+							p.triggerSum += v.TLSum;
+							return p;
+						},
+						function (p,v){
+							--p.count;
+							p.sum -= v.Sum;
+							p.triggerSum -= v.TLSum;
+							return p;
+						},
+						function(){
+							return {
+								count: 0,
+								sum: 0,
+								triggerSum: 0
+							};
+						}
+					);
+
+				var rateBubble = dc.bubbleChart('#rateBubble');
+				rateBubble.width(1400)
+						  .height(600)
+						  .dimension(bubDim)
+						  .group(ratingByComment)
+						  .keyAccessor(function(p){
+						  	return p.value.count;
+						  })
+						  .valueAccessor(function(p){
+						  	return p.value.triggerSum;
+						  })
+						  .radiusValueAccessor(function(p){
+						  	//console.log("this is :"+p.value.count+" "+p.value.sum+" "+p.value.triggerSum);
+						  	return p.value.sum;
+						  })
+						  .renderHorizontalGridLines(true)
+						  .renderVerticalGridLines(true)
+						  .maxBubbleRelativeSize(0.3)
+					      .x(d3.scale.linear().domain([0, 60]))
+					      .elasticX(true)
+					      .y(d3.scale.linear().domain([0, 300]))
+					      .elasticY(true)
+					      .r(d3.scale.linear().domain([0, 800]))
+					      .renderTitle(true)
+					      .title(function(p){
+					      	return "Student ID: "+p.key+"\n"+
+					      		   "Number of Comments: "+p.value.count+"\n"+
+					      		   "Total Ratings: "+p.value.sum+"\n"+
+					      		   "Total Learning Trigger Ratings: "+p.value.triggerSum;
+					      });
+
+				
+			} // end rating chart
+
+
+
+			function render_charts(){
+				dc.renderAll();
+			} // end render_charts
+
+
+
+			function run_page(){
+				get_csv_vals();
+				init_crossfilter();
+				cue_bin_viz();
+				video_viz();
+				commentatorViz()
+				aspectMatrix();
+				ratingChart();
+				render_charts();
+			}
+
+			run_page();
+
+			d3.select("#clusterSubmit").on("click",function(){
+				num_k = document.getElementById("user_k").value;
+				run_page();
+				});
+
+			// Getting user input for sentiment analysis
+			d3.select("#sentiSubmit").on("click",function(){
+				var selectStudent = document.getElementById("selectStudent");
+				selectedStudent = selectStudent.options[selectStudent.selectedIndex].value;
+
+				var selectVid = document.getElementById("selectVid");
+				selectedVid = selectVid.options[selectVid.selectedIndex].value;
+
+				sentimentCall();
+			});
+
+			
+
+			d3.select("#vidReset").on("click",function(){
+				commentsPerVideoRow.filterAll();
+				render_charts();
+			});
 
 
 	}); // end of csv read 
-
-
-
-	/* change this pie chart to a row chart
-	This part is just here to show that i once tried to use a 
-	pie chart but it did not work. Makes for a good report and shit.
-
-			commentPerVideoPie = dc.pieChart("#videoPie");
-			commentPerVideoPie.height(400)
-							  .width(800)
-							  .innerRadius(50)
-							  .renderLabel(false)
-							  //.externalLabels(50)
-							  .externalRadiusPadding(100)
-							  .drawPaths(true)
-							  .dimension(videoDim)
-							  .group(commentsPerVideo)
-							  .legend(dc.legend());
-
-			commentPerVideoPie.on('pretransition',function(commentPerVideoPie){
-				commentPerVideoPie.selectAll('.dc-legend-item text')
-								  	.text('')
-								  .append('tspan')
-								  	.text(function(d){return d.name;})
-								  .append('tspan')
-								  	.attr('x',100)
-								  	.attr('text-anchor','end')
-								  	.text(function(d){return d.data;})
-			});*/
 </script>
+
 </body>
 </html>
