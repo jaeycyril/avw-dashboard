@@ -2,8 +2,11 @@
 <html>
 <head>
 	<title>Hello pages</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="/static/lib/js/bootstrap.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="/static/lib/css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="/static/lib/css/dc.min.css">
+	<!--<link rel="stylesheet" type="text/css" href="/static/lib/css/dc.min.css">-->
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.css">
 	<link rel="stylesheet" type="text/css" href="/static/main_style.css">
 	<style type="text/css">
 		.heat-box{
@@ -20,93 +23,120 @@
     </div>
 </nav>
 
- <div class="row" style="border-bottom: solid skyblue thin">
- 	<div class="col-md-5" id=commentsPerMinute>
- 		<h4>Comments per minute</h4>
- 	</div>
- 	<div class="col-md-3" id=videoRow>
- 		<h4>Comments Per Video <small><a href='#' id="vidReset">reset</a></small></h4>
- 	</div>
- 	<div class="col-md-4" id="commentatorRow">
- 		<h4>Comments Per Student</h4>
- 	</div>
- </div>
+<!-- Tabs -->
+<ul class="nav nav-tabs">
+	<li class="active"><a data-toggle="tab" href="#home">Home</a></li>
+  	<li><a data-toggle="tab" href="#studentab">Student</a></li>
+</ul>
 
- <div id="commentAspectMatrix" style="margin:3em; border-bottom: solid skyblue thin">
- <h4>Student interaction with aspects</h4>
- </div>
+<div class="tab-content"> <!-- tab content -->
+
+  <div id="home" class="tab-pane active">     <!-- tab 1 -->
+	  	<div class="row" style="border-bottom: solid skyblue thin">
+		 	<div class="col-md-4" id=videoRow>
+		 		<h4>Comments Per Video <small><a href='#' id="vidReset">reset</a></small></h4>
+		 	</div>
+		 	<div class="col-md-8" id=commentsPerMinute style="padding-left: 2em">
+		 		<h4>Comments per minute</h4>
+		 	</div>
+	    </div>
+	    <div class="container" id="rateBubble">
+			<h4>Student Comment Ratings (Size of bubble is Number of Ratings)</h4>
+		</div>
+  </div><!-- end of tab 1 -->
+
+  <div id="studentab" class="tab-pane">     <!--tab 2 -->
+  			<div class="row">
+		 		<div class="col-md-6"><h4>Comments Per Student</h4></div>
+		 		<div class="col-md-6"><h4>Student sentiment per video</h4></div>
+	 		</div> <!-- end row for headers -->
+	 	 	
+	 	 	<div class="row" style="padding:2em;">
+	 	 	<div class="col-md-6"></div>
+		 	<div class="col-md-1">
+		 		<select class="selectpicker show-menu-arrow" title="Choose a student" id="selectStudent">
+		 			<option>LstudyID599</option>
+		 			<option>UCW2</option>
+					<option>UCW4</option>
+					<option>UCW5</option>
+					<option>UCW6</option>
+					<option>UCW7</option>
+					<option>UCW8</option>
+					<option>UCW9</option>
+					<option>UCW10</option>
+					<option>UCW11</option>
+					<option>UCW12</option>
+					<option>UCW15</option>
+					<option>UCT18</option>
+					<option>UCT19</option>
+					<option>UCT20</option>
+					<option>UCT21</option>
+					<option>UCT24</option>
+					<option>UCT25</option>
+					<option>UCT26</option>
+					<option>UCT27</option>
+					<option>UCF29</option>
+					<option>UCF31</option>
+					<option>UCM33</option>
+					<option>UCM34</option>
+					<option>UCT37</option>
+					<option>UCT38</option>
+					<option>UCT39</option>
+					<option>LstudyID209</option>
+					<option>LstudyID912</option>
+					<option>LstudyID855</option>
+					<option>LstudyID599</option>
+					<option>LstudyID030</option>
+					<option>LstudyID732</option>
+					<option>LstudyID636</option>
+					<option>LstudyID514</option>
+					<option>LstudyID242</option>
+					<option>UCW13</option>
+					<option>LstudyID491</option>
+					<option>UCT23</option>
+		 		</select>
+		 	</div>
+		 	<div class="col-md-1">
+		 		<select class="selectpicker" title="choose a course" id="selectVid">
+		 			<option>TUTORIAL 1</option>
+		 			<option>TUTORIAL 2</option>
+		 			<option>TUTORIAL 3</option>
+		 			<option>TUTORIAL 4</option>
+		 			<option>EXAMPLE 1</option>
+		 			<option>EXAMPLE 2</option>
+		 			<option>EXAMPLE 3</option>
+		 			<option>EXAMPLE 4</option>
+		 		</select>
+		 	</div>
+		 	<div class="col-md-1">
+		 		<button type="button" class="btn btn-info" id="sentiSubmit">Submit</button>
+		 	</div>
+		 	<div class="col-md-2"><p>Please wait for chart to load after pressing the button</p></div>
+		</div>
+
+		<div class="row">
+		<div class="col-md-6" id=commentatorRow></div>
+		<div class="col-md-6" id=sentiplot></div>
+		</div>
 
 
- <div class=row id="selectStud" style="margin:3em">
- 	<h4>Student sentiment per video</h4>
- 	<div class="col-xs-1">
- 		<select class="selectpicker show-menu-arrow" title="Choose a student" id="selectStudent">
- 			<option>LstudyID599</option>
- 			<option>UCW2</option>
-			<option>UCW4</option>
-			<option>UCW5</option>
-			<option>UCW6</option>
-			<option>UCW7</option>
-			<option>UCW8</option>
-			<option>UCW9</option>
-			<option>UCW10</option>
-			<option>UCW11</option>
-			<option>UCW12</option>
-			<option>UCW15</option>
-			<option>UCT18</option>
-			<option>UCT19</option>
-			<option>UCT20</option>
-			<option>UCT21</option>
-			<option>UCT24</option>
-			<option>UCT25</option>
-			<option>UCT26</option>
-			<option>UCT27</option>
-			<option>UCF29</option>
-			<option>UCF31</option>
-			<option>UCM33</option>
-			<option>UCM34</option>
-			<option>UCT37</option>
-			<option>UCT38</option>
-			<option>UCT39</option>
-			<option>LstudyID209</option>
-			<option>LstudyID912</option>
-			<option>LstudyID855</option>
-			<option>LstudyID599</option>
-			<option>LstudyID030</option>
-			<option>LstudyID732</option>
-			<option>LstudyID636</option>
-			<option>LstudyID514</option>
-			<option>LstudyID242</option>
-			<option>UCW13</option>
-			<option>LstudyID491</option>
-			<option>UCT23</option>
- 		</select>
- 	</div>
- 	<div class="col-xs-1">
- 		<select class="selectpicker" title="choose a course" id="selectVid">
- 			<option>TUTORIAL 1</option>
- 			<option>TUTORIAL 2</option>
- 			<option>TUTORIAL 3</option>
- 			<option>TUTORIAL 4</option>
- 			<option>EXAMPLE 1</option>
- 			<option>EXAMPLE 2</option>
- 			<option>EXAMPLE 3</option>
- 			<option>EXAMPLE 4</option>
- 		</select>
- 	</div>
- 	<div class="col-xs-1">
- 	<button type="button" class="btn btn-info" id="sentiSubmit">Submit</button>
- 	</div>
- 	</div>
- 	<div class="container" id=sentiplot></div>
-	<div class="container" id="rateBubble"></div>
-	<div class="container" id="bubbleRange"></div>
+		<div class="container" id="commentAspectMatrix" style="margin:3em; border-bottom: solid skyblue thin">
+	 	 	<h4>Student interaction with aspects</h4>
+	 	</div>
+
+	 	<div class="container" id="barAspect"></div>
+	
+  </div>
+
+
+</div> <!-- tab content end --> 
 
 <!-- js section -->
 <script src="/static/lib/js/d3.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 <script src="/static/lib/js/crossfilter.min.js"></script>
-<script src="/static/lib/js/dc.min.js"></script>
+<!--<script src="/static/lib/js/dc.min.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.js.map"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
 		d3.csv("/static/presentationFinal.csv",function(data){
@@ -164,7 +194,7 @@
 				var compositeChart = dc.compositeChart('#commentsPerMinute');
 
 				compositeChart
-			        .width(600)
+			        .width(900)
 			        .height(400)
 			        .x(d3.scale.linear().domain([0,10]))
 			        .yAxisLabel("Number of comments")
@@ -217,10 +247,8 @@
 			                .dashStyle([15,2,2]),
 			            ])
 			        .brushOn(false)
-
-				//cueDim.filterAll();
-
 			} //end cue_bin_viz
+
 
 			function video_viz(){
 				var videoDim = ndx.dimension(function(d){
@@ -233,15 +261,17 @@
 
 				// row chart
 				var commentPerVideoRow = dc.rowChart('#VideoRow');
-				commentPerVideoRow.width(400)
+				commentPerVideoRow.width(500)
 								  .height(400)
 								  .dimension(videoDim)
 								  .group(commentsPerVideo)
+								  .colors('skyblue')
 								  .title(function(d){
 								  	return d.key+": "+d.value+" comments";
 								  });
 
 			} // end video_viz
+
 
 			function commentatorViz(){
 				var commentatorDim = ndx.dimension(function(d){
@@ -251,8 +281,8 @@
 				var commentsPerCommentator = commentatorDim.group().reduceCount();
 
 				var commentsPerCommentatorRow = dc.rowChart('#commentatorRow');
-				commentsPerCommentatorRow.width(400)
-										 .height(400)
+				commentsPerCommentatorRow.width(700)
+										 .height(500)
 										 .dimension(commentatorDim)
 										 .group(commentsPerCommentator)
 										 .elasticX(true)
@@ -269,9 +299,9 @@
 					return [d.TRIMASPECT, d.COMMENTATOR];
 				});
 				var commentatorAspectCount = commentatorAspectDim.group().reduceCount();
-				var colorScale = d3.scale.linear()
+				/*var colorScale = d3.scale.linear()
 										 .domain([0,10])
-										 .range(["red","blue"]);
+										 .range(["red","blue"]);*/
 				var aspectHeatMap = dc.heatMap("#commentAspectMatrix");
 
 				aspectHeatMap.width(1400)
@@ -280,11 +310,8 @@
 							 .group(commentatorAspectCount)
 							 .keyAccessor(function(d){ return d.key[0]; })
 							 .valueAccessor(function(d){ return d.key[1]; })
-							 .colorAccessor(function(d){
-							 	//console.log(d.key[0]+" "+d.key[1]+" "+d.value); 
-							 	return d.value;
-							 })
-							 .colors(["#d5f9ef","#02addf","#003a89","#000"])
+							 .colorAccessor(function(d){ return d.value; })
+							 .colors(["#f0f9e8","#bae4bc","#7bccc4","#43a2ca","#0868ac"])
 							 .calculateColorDomain()
 							 .xBorderRadius(0)
 							 .yBorderRadius(0)
@@ -295,6 +322,25 @@
 							 });
 
 			} // end aspectMatrix
+
+
+			function barAspect(){
+				var barAspectDim = ndx.dimension(function(d){
+					return d.TRIMASPECT;
+				});
+				var barGroup = barAspectDim.group().reduceCount();
+				var barAspect = dc.barChart("#barAspect")
+				barAspect.width(1400)
+						 .height(400)
+						 .dimension(barAspectDim)
+						 .x(d3.scale.ordinal())
+          				 .xUnits(dc.units.ordinal)
+          				 .xAxisLabel('Aspects')
+          				 .yAxisLabel('Number of Aspects used')
+          				 .elasticY(true)
+          				 .group(barGroup)
+
+          				} // end of barAspect
 
 
 			function sentimentChart(sendata){
@@ -318,6 +364,9 @@
 
 				var layout = {
 					title: 'Sentiment Plot',
+					autosize: false,
+  					width: 600,
+  					height: 500,
 					xaxis: {
 					  	title: 'Time of comment (seconds)',
 					    titlefont: {
@@ -430,14 +479,21 @@
 						  	//console.log("this is :"+p.value.count+" "+p.value.sum+" "+p.value.triggerSum);
 						  	return p.value.sum;
 						  })
+						  .colorAccessor(function(p){
+						  	return p.value.sum;
+						  })
+						  .colors(["#ffffb2","#fecc5c","#fd8d3c","#e31a1c"])
+						  .colorDomain([0,300])
 						  .renderHorizontalGridLines(true)
 						  .renderVerticalGridLines(true)
 						  .maxBubbleRelativeSize(0.3)
-					      .x(d3.scale.linear().domain([0, 60]))
+					      .x(d3.scale.linear().domain([0, 100]))
 					      .elasticX(true)
 					      .y(d3.scale.linear().domain([0, 300]))
 					      .elasticY(true)
 					      .r(d3.scale.linear().domain([0, 800]))
+					      .xAxisLabel("Total Number of Comments")
+					      .yAxisLabel("Number of Comments which triggered learning in others ")
 					      .renderTitle(true)
 					      .title(function(p){
 					      	return "Student ID: "+p.key+"\n"+
@@ -464,6 +520,7 @@
 				video_viz();
 				commentatorViz()
 				aspectMatrix();
+				//barAspect();
 				ratingChart();
 				render_charts();
 			}
@@ -496,6 +553,5 @@
 
 	}); // end of csv read 
 </script>
-
 </body>
 </html>
