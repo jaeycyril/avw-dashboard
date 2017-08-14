@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Hello pages</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="/static/lib/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/lib/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/main_style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="{{ url_for('index') }}">AVW DASHBOARD</a>
+    </div>
+    <ul class="nav navbar-nav">
+    	<li><a href="#">ABOUT AVW</a></li>
+    	<li><a href="{{ url_for('help') }}">HELP</a></li>
+    </ul>
+    </div>
+</nav>
+
+		<div class="container">
+			<h4>AVW Dashboard</h4>
+			The Active Video Watching Dashboard is a tool built to enable quick and easy
+			analysis of learner activity data. This data is from the log files produced
+			by the Active Video Watching environments which is described below. The rationale
+			is simple: 
+			<ul>
+				<li>A tutor can identify good and bad learning behaviours</li>
+				<li>A tutor may not be skilled to analyse the log data and derive necessary insight</li>
+				<li>A data analyst may not have the desired background knowledge to note the truly important 
+				trends and signals from their analysis
+				</li>
+				<li>Provide an easy analysis tool for the tutor to explore the data themselves and
+				notice iimportant patterns which ONLY they can because of their domain knowledge
+				</li>
+			</ul> 
+		</div>
+
+		<div class="container">
+			<h4>What is AVW?</h4>
+			<p>
+				The Active Video Watching system (AVW) is a tool which was built by a team of researchers 
+				to aid both tutors and students in their video-based learning approach. It allows tutors 
+				to add some form of engagement to videos (including publicly sourced videos e.g. from Youtube)
+				and present them to students in a <em>classroom.</em> Reflective Experiential learning (i.e. 
+				cognition through reflection on past experiences in contrast with present information) of soft skills
+				like collaboration, critical thinking and inter-cultural awareness, is one of the main purposes of AVW.
+			</p>
+			<p>
+				The way the system works is simple and the following description would help provide a 
+				more lucid image.
+				The tutor gathers or creates some videos relevant to the subject to be taugt. The tutor then creates
+				a class with those videos after adding descriptions and <strong>aspects</strong> to the videos. The aspects
+				are supposed to draw the learner's attention to important points in the video and trigger reflection i.e.
+				to get the learner dwelling on certain concepts and recalling past experiences as well.
+			</p> 
+			<p> 
+				The learning environment has both a <strong>Personal Space</strong> and a <strong>Social Space</strong>.
+				In the personal space, each individual learner can watch the videos; pause at any point, enter their
+				thought/comment in a textbox provided and annotate the comment with any of the aspects. The comment is saved 
+				once they resume watching the video.
+			</p>
+			<p>
+				The social space contains all comments from all learners which have been approved and 
+				and anonymized by the tutor. Each learner can view comments from other learners and rate them (replies are
+				currently not supported, so this differs from a discussion forum). The learners can also view the video
+				snippet related to the comment made by other learners in the social space.
+				The tutor can download the interaction log as an XML file to be used further analysis and this file is 
+				the main raw material for this dashboard tool.
+			</p>
+		</div>
+
+		<div class="container">
+			<h4>THE EXPERIMENT</h4>
+			<P>
+				The data which was used to drive the visualizations in this dashboard were from an experiment conducted
+				using AVW to teach Pitch Presentation skills to a group of Postgraduate students. A total of 8 videos were 
+				carefully selected from Youtube; 4 were tutorials of how to give presentations (labelled 'TUTORIAL') and 
+				the other 4 were actual presentations (labelled 'EXAMPLE'). The students were made to watch the TUTORIAL
+				videos and then the EXAMPLE videos.
+			</P>
+			<p>
+				The <strong>ASPECTS</strong> used for the TUTORIAL videos to stimulate learners to recall and reflect on their past
+				experiences are:
+				<ul>
+					<li><em>I am rather good at this</em></li>
+					<li><em>I did/saw this in the past</em></li>
+					<li><em>I didn't realize I wasn't doing it</em></li>
+					<li><em>I like this point</em></li>
+				</ul>
+				The <strong>ASPECTS</strong> used for the EXAMPLE videos to help learners reinforce concepts taught in the 
+				tutorial videos are:
+				<ul>
+					<li><em>Delivery</em></li>
+					<li><em>Visual aids</em></li>
+					<li><em>Structure</em></li>
+					<li><em>Speech</em></li>
+				</ul>
+			</p>
+			<p>
+				The final part of the experiment was getting the learners to use the social space. They were able to 
+				view the comments of other learners and rate those comments using the following available options
+				which were also carefully selected to foster even deeper reflection. The <strong>RATING OPTIONS</strong> were:
+				<ul>
+					<li><em>This is useful for me</em></li>
+					<li><em>I hadn't thought of this</em></li>
+					<li><em>I didn't notice this</em></li>
+					<li><em>I don't agree with this</em></li>
+					<li><em>I like this point</em></li>
+				</ul>
+				The first three (3) were termed the <strong>LEARNING TRIGGER RATINGS</strong> while the last two were called 
+				<strong>OPINION INDUCING RATINGS</strong>.
+			</p>
+			<p>
+				The other parts of the experiment are not relevant here, as the data from those parts were not used
+				in preparing this dashboard. The interaction data based on the above explanation was used solely for
+				the dashboard.
+			</p>
+		</div>
+
+</body>
+</html>

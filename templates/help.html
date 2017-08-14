@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Hello pages</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="/static/lib/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/lib/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/main_style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="{{ url_for('index') }}">AVW DASHBOARD</a>
+    </div>
+    <ul class="nav navbar-nav">
+    	<li><a href="{{ url_for('about') }}">ABOUT AVW</a></li>
+    	<li><a href="#">HELP</a></li>
+    </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <p>
+        This is the help page for the AVW dashboard. Please read about 
+        AVW <a href="{{ url_for('about') }}">here</a>. This dashboard
+        was created to present information about AVW using 
+        simple, connected and interactive visualizations. 
+    </p>
+    <p>
+        This Help page was made as a simple user manual for the tool.
+        Below are simple descriptions of the visualizations in the
+        dashboard.
+    </p>
+    <ul>
+        <li><a href="#general">General</a></li>
+        <li><a href="#vidalytics">Video Analytics tab</a>
+            <ul>
+                <li><a href="#vidfilter">Number of Comments per video</a></li>
+                <li><a href="#vidtimeline">Number of Comments over Video Timeline</a></li>
+                <li><a href="#rating">Impact of Individual Student Comment</a></li>
+            </ul>
+        </li>
+        <li><a href="#studalytics">Student Analytics tab</a>
+            <ul>
+                <li><a href="#studcom">Number of Comments per Student</a></li>
+                <li><a href="#aspects">Number of Aspects used by Students</a></li>
+                <li><a href="#sentiment">Student Comment Sentiment per video</a></li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="container" id="general">
+    <h4>GENERAL</h4>
+    <p>
+        The dashbaord has been built to be connected. This means that interacting with one of 
+        the charts would produce effects in the other charts. This is true of all the charts 
+        except the Sentiment plot. 
+    </p>
+    <p>
+        The dashbaord was created this way to ease the process of filtering. This unconventional
+        method of filtering allows the user to answer complex questions which would only
+        usually be possible using more complex visualizations.
+    </p>
+    <p>
+        The main interaction methods here are: <strong>clicking</strong> and <strong>hovering</strong>.
+        Clicking on the elements of the visualizations would select it and filter other charts 
+        accordingly.
+        Hovering over any chart element, shows detailed information about the numbers behind it.  
+    </p>
+</div>
+
+<div class="container" id="vidalytics">
+    <h4>Video Analytics</h4>
+    <p>
+        Use charts in this section to answer questions based on videos.
+    </p>
+</div>
+
+<div class="container" id="vidfilter">
+    <h4>Number of Comments per Video</h4>
+    <p>
+        This chart is as simple as possible. It shows the number of commnets
+        for each of the videos watched by the students. 
+    </p>
+    <p>
+        Click on any of the bars to select that particular video and filter other charts
+        to show only information concerning that video.
+    </p>
+    <p>
+        Multiple selections are possible which filter other charts according to information
+        from all selections.
+    </p>
+    <p>
+        Any active selection remains in colour while inactive selections are greyed out.
+    </p>
+    <p>
+        Click the "reset" link to select all videos again i.e. clear all filters.
+    </p>
+</div>
+
+<div class="container" id="vidtimeline">
+    <h4>Number of Comments over Video Timeline</h4>
+    <p>
+        This chart shows student comments at different minutes of the videos.
+        The timeline has been discretized into minutes.
+    </p>
+    <p>
+        This chart does not support selecting by clicking. It can only be 
+        filtered using the "Number of Comments per Video" chart to its left.
+    </p>
+    <p>
+        Hovering over the points on each line shows number of comments at that point.
+    </p>
+</div>
+
+<div class="container" id="rating">
+    <h4>Impact of Individual Student Comment</h4>
+    <p>
+        This chart shows the extent to which other students found the comments 
+        of a particular student interesting. 
+    </p>
+    <p>
+        The bubbles represent the number of total number of ratings that a student 
+        got for his/her comments. 
+    </p>
+    <p>
+        The color of the bubbles represent the number of ratings which were learning triggers.
+        Learning trigger ratings are a subset of other ratings. See ABOUT AVW page.
+    </p>
+    <p>
+        Clicking on any bubble, selects that student and filters the other charts accordingly.
+    </p>
+    <p>
+        Hover over a bubble to reveal detailed info about that student.
+    </p>
+</div>
+
+<div class="container" id="studalytics">
+    <h4>Student analytics tab</h4>
+    <p>
+        This tab shows charts which focus mostly on the students/ learners. The charts here
+        can be used to filter other charts based on the students.
+    </p>
+</div>
+
+<div class="container" id="studcom">
+    <h4>Number of Comments per Student</h4>
+    <p>
+        This chart simply the total number of comments made by each students. 
+    </p>
+    <p>
+        Clicking on any of the bars selects the students and filters all the other charts
+        with information based on only that student. Useful for gaining insight on just a
+        particular student.
+    </p>
+</div>
+
+<div class="container" id="aspects">
+    <h4>Number of Aspects used by Students</h4>
+    <p>
+        This chart shows the different aspects and how many times they were used throughout 
+        by the students.
+    </p>
+    <p>
+        Click on the bars to select an aspect and filter other charts based on that aspects.
+        This allows the user to gain insight based on that particular aspect.
+    </p>
+</div>
+
+<div class="container" id="sentiment">
+    <h4>Student Comment Sentiment per video</h4>
+    <p>
+        This chart is quite different from the rest and not connected to the others.
+        It is an attempt to analyse the actual comments made by the students. It uses a 
+        text sentiment analytics service from the Microsoft Azure platform.
+    </p>
+    <p>
+        Select a student and a video and this this chart shows how positive or negative
+        each of the student's comments are.
+    </p>
+</div>
+
+</body>
+</html>

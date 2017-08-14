@@ -1,58 +1,96 @@
-</!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-	<title>Hello pages</title>
+	<title>avw dashboard</title>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<script src="/static/lib/js/bootstrap.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="/static/lib/css/bootstrap.min.css">
 	<!--<link rel="stylesheet" type="text/css" href="/static/lib/css/dc.min.css">-->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.css">
 	<link rel="stylesheet" type="text/css" href="/static/main_style.css">
-	<style type="text/css">
-		.heat-box{
-			stroke: #000000;
-			stroke-width: 2px;
-		}
-	</style>
 </head>
 <body>
 
 <nav class="navbar navbar-inverse">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">AVW DASHBOARD</a>
+	<div class="container-fluid">
+	    <div class="navbar-header">
+	      <a class="navbar-brand" href="#">AVW DASHBOARD</a>
+	    </div>
+	    <ul class="nav navbar-nav">
+	    	<li><a href="{{ url_for('about') }}">ABOUT AVW</a></li>
+	    	<li><a href="{{ url_for('help') }}">HELP</a></li>
+	    </ul>
     </div>
 </nav>
 
+<div>
+	<h4><a href="#" id="resetAll">Reset All Charts</a></h4>
+</div>
+
 <!-- Tabs -->
 <ul class="nav nav-tabs">
-	<li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-  	<li><a data-toggle="tab" href="#studentab">Student</a></li>
+	<li class="active"><a data-toggle="tab" href="#videoTab">Video Analytics</a></li>
+  	<li><a data-toggle="tab" href="#studentab">Student Analytics</a></li>
 </ul>
 
 <div class="tab-content"> <!-- tab content -->
 
-  <div id="home" class="tab-pane active">     <!-- tab 1 -->
-	  	<div class="row" style="border-bottom: solid skyblue thin">
-		 	<div class="col-md-4" id=videoRow>
-		 		<h4>Comments Per Video <small><a href='#' id="vidReset">reset</a></small></h4>
+  <div id="videoTab" class="tab-pane active">     <!-- video tab  -->
+	  	<div class="row" style="border-bottom: solid black thick">
+		 	<div class="col-md-4" id="VideoRow">
+		 		<h4>Number of Comments Per Video <small><a href='#' id="vidReset">reset</a></small></h4>
+		 		<p class="instruct-left">click to select (click again to deselect)</p>
 		 	</div>
-		 	<div class="col-md-8" id=commentsPerMinute style="padding-left: 2em">
-		 		<h4>Comments per minute</h4>
+		 	<div class="col-md-8" id="commentsPerMinute" style="padding-left: 2em">
+		 		<h4>Number of Comments over Video Timeline</h4>
+		 		<p class="instruct-left">selecting a video narrows this chart</p>
 		 	</div>
 	    </div>
-	    <div class="container" id="rateBubble">
-			<h4>Student Comment Ratings (Size of bubble is Number of Ratings)</h4>
-		</div>
-  </div><!-- end of tab 1 -->
 
-  <div id="studentab" class="tab-pane">     <!--tab 2 -->
-  			<div class="row">
-		 		<div class="col-md-6"><h4>Comments Per Student</h4></div>
-		 		<div class="col-md-6"><h4>Student sentiment per video</h4></div>
-	 		</div> <!-- end row for headers -->
-	 	 	
+	    <div class="row">
+	    	<div class="col-md-7">
+	    		<h4>Impact of Individual Student Comment (Size of bubble is Number of Ratings by other students) <small><a href='#' id="bubReset">reset</a></small></h4>
+				<p class="instruct-left">click any bubble to select. Hover to see detailed info. </p>
+	    	</div>
+	    	<div class="col-md-5">
+	    		<br>
+				<table class="table table-responsive">
+					<tbody>
+						<tr>
+							<td style="background-color: #ffffb2;">  0-24  </td>
+							<td style="background-color: #fecc5c;">  25-49  </td>
+							<td style="background-color: #fd8d3c;">  50-74  </td>
+							<td style="background-color: #e31a1c;">  75-100  </td>
+						</tr>
+					</tbody>
+				</table>
+				<p style="color: #fd8d3c;">Colors represent Number of Learning Trigger Ratings (see <a href="{{ url_for('about') }}">About AVW</a> for more details)</p>
+			</div>
+	    </div>
+
+	    <div class="container" id="rateBubble"></div>
+		
+  </div><!-- end of video tab -->
+
+  <div id="studentab" class="tab-pane">     <!-- student tab -->
+  
+
+
+  			<div class="row" style="border-bottom: solid black thick">
+				<div class="col-md-6" id=commentatorRow>
+					<h4>Number of Comments Per Student <small><a href='#' id="studReset">reset</a></small></h4>
+				 	<p class="instruct-left">click to select (affects other charts)</p>
+				</div>
+				<div class="col-md-6" id="barAspect">
+					<h4>Number of Aspects Used by Students <small><a href='#' id="aspReset">reset</a></small></h4>
+				 	<p class="instruct-left">click to select (affects other charts)</p>
+				</div>
+			</div>
+
+	 	 	<div class="container-fluid">
+	 	 		<h4>Student Comment Sentiment per video</h4>
+	 	 	</div>
 	 	 	<div class="row" style="padding:2em;">
-	 	 	<div class="col-md-6"></div>
 		 	<div class="col-md-1">
 		 		<select class="selectpicker show-menu-arrow" title="Choose a student" id="selectStudent">
 		 			<option>LstudyID599</option>
@@ -114,28 +152,18 @@
 		 	<div class="col-md-2"><p>Please wait for chart to load after pressing the button</p></div>
 		</div>
 
-		<div class="row">
-		<div class="col-md-6" id=commentatorRow></div>
-		<div class="col-md-6" id=sentiplot></div>
-		</div>
-
-
-		<div class="container" id="commentAspectMatrix" style="margin:3em; border-bottom: solid skyblue thin">
-	 	 	<h4>Student interaction with aspects</h4>
-	 	</div>
-
-	 	<div class="container" id="barAspect"></div>
-	
-  </div>
+		<div class="container" id=sentiplot></div>
+	 	
+  </div><!-- end of student tab -->
 
 
 </div> <!-- tab content end --> 
 
 <!-- js section -->
-<script src="/static/lib/js/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.js"></script>
 <script src="/static/lib/js/crossfilter.min.js"></script>
 <!--<script src="/static/lib/js/dc.min.js"></script>-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.js.map"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
@@ -164,6 +192,14 @@
 				console.log("Size of dataset is :",ndx.size());
 			} // end init_crossfilter
 
+
+			// All chart names declared globally to allow resetting
+			var compositeChart;
+			var commentPerVideoRow;
+			var commentsPerCommentatorRow;
+			var barAspect;
+			var rateBubble;
+
 			// Get cuepoint bins as dimension 
 			function cue_bin_viz(){
 				var cueDim = ndx.dimension(function(d){
@@ -191,7 +227,7 @@
 				var tut4 = groupVid("TUTORIAL 4");
 
 
-				var compositeChart = dc.compositeChart('#commentsPerMinute');
+				compositeChart = dc.compositeChart('#commentsPerMinute');
 
 				compositeChart
 			        .width(900)
@@ -260,7 +296,7 @@
 
 
 				// row chart
-				var commentPerVideoRow = dc.rowChart('#VideoRow');
+				commentPerVideoRow = dc.rowChart('#VideoRow');
 				commentPerVideoRow.width(500)
 								  .height(400)
 								  .dimension(videoDim)
@@ -280,7 +316,7 @@
 
 				var commentsPerCommentator = commentatorDim.group().reduceCount();
 
-				var commentsPerCommentatorRow = dc.rowChart('#commentatorRow');
+				commentsPerCommentatorRow = dc.rowChart('#commentatorRow');
 				commentsPerCommentatorRow.width(700)
 										 .height(500)
 										 .dimension(commentatorDim)
@@ -294,52 +330,18 @@
 			} // end commentatorViz
 
 
-			function aspectMatrix(){
-				var commentatorAspectDim = ndx.dimension(function(d){
-					return [d.TRIMASPECT, d.COMMENTATOR];
-				});
-				var commentatorAspectCount = commentatorAspectDim.group().reduceCount();
-				/*var colorScale = d3.scale.linear()
-										 .domain([0,10])
-										 .range(["red","blue"]);*/
-				var aspectHeatMap = dc.heatMap("#commentAspectMatrix");
-
-				aspectHeatMap.width(1400)
-							 .height(400)
-							 .dimension(commentatorAspectDim)
-							 .group(commentatorAspectCount)
-							 .keyAccessor(function(d){ return d.key[0]; })
-							 .valueAccessor(function(d){ return d.key[1]; })
-							 .colorAccessor(function(d){ return d.value; })
-							 .colors(["#f0f9e8","#bae4bc","#7bccc4","#43a2ca","#0868ac"])
-							 .calculateColorDomain()
-							 .xBorderRadius(0)
-							 .yBorderRadius(0)
-							 .title(function(d){
-							 	return "Student id: " + d.key[1] + "\n"+
-							 		   "Aspect: " + d.key[0] + "\n" +
-							 		   "Student used this aspect " + d.value + " time(s) \n"
-							 });
-
-			} // end aspectMatrix
-
-
 			function barAspect(){
 				var barAspectDim = ndx.dimension(function(d){
 					return d.TRIMASPECT;
 				});
 				var barGroup = barAspectDim.group().reduceCount();
-				var barAspect = dc.barChart("#barAspect")
-				barAspect.width(1400)
-						 .height(400)
-						 .dimension(barAspectDim)
-						 .x(d3.scale.ordinal())
-          				 .xUnits(dc.units.ordinal)
-          				 .xAxisLabel('Aspects')
-          				 .yAxisLabel('Number of Aspects used')
-          				 .elasticY(true)
+				barAspect = dc.rowChart("#barAspect")
+				barAspect.width(700)
+						 .height(500)
+						 .elasticX(true)
+						 .colors('#fdae6b')
+          				 .dimension(barAspectDim)
           				 .group(barGroup)
-
           				} // end of barAspect
 
 
@@ -355,9 +357,16 @@
 					sentimentY.push(newSentiRange);
 				});
 
+				function toMinute(num){
+					return Math.ceil(num/60);
+				}
+
+				// convert seconds to minutes
+				cueXmin = cueX.map(toMinute);
+
 				var line1 = 
 					[{
-					x: cueX,
+					x: cueXmin,
 					y: sentimentY,
 					type: 'bar'
 						}];
@@ -464,8 +473,8 @@
 						}
 					);
 
-				var rateBubble = dc.bubbleChart('#rateBubble');
-				rateBubble.width(1400)
+				rateBubble = dc.bubbleChart('#rateBubble');
+				rateBubble.width(1450)
 						  .height(600)
 						  .dimension(bubDim)
 						  .group(ratingByComment)
@@ -473,17 +482,17 @@
 						  	return p.value.count;
 						  })
 						  .valueAccessor(function(p){
-						  	return p.value.triggerSum;
+						  	return p.value.sum;
 						  })
 						  .radiusValueAccessor(function(p){
 						  	//console.log("this is :"+p.value.count+" "+p.value.sum+" "+p.value.triggerSum);
 						  	return p.value.sum;
 						  })
 						  .colorAccessor(function(p){
-						  	return p.value.sum;
+						  	return p.value.triggerSum;
 						  })
 						  .colors(["#ffffb2","#fecc5c","#fd8d3c","#e31a1c"])
-						  .colorDomain([0,300])
+						  .colorDomain([0,100])
 						  .renderHorizontalGridLines(true)
 						  .renderVerticalGridLines(true)
 						  .maxBubbleRelativeSize(0.3)
@@ -491,9 +500,9 @@
 					      .elasticX(true)
 					      .y(d3.scale.linear().domain([0, 300]))
 					      .elasticY(true)
-					      .r(d3.scale.linear().domain([0, 800]))
+					      .r(d3.scale.linear().domain([0, 700]))
 					      .xAxisLabel("Total Number of Comments")
-					      .yAxisLabel("Number of Comments which triggered learning in others ")
+					      .yAxisLabel("Number of Ratings for the Comments ")
 					      .renderTitle(true)
 					      .title(function(p){
 					      	return "Student ID: "+p.key+"\n"+
@@ -519,8 +528,7 @@
 				cue_bin_viz();
 				video_viz();
 				commentatorViz()
-				aspectMatrix();
-				//barAspect();
+				barAspect();
 				ratingChart();
 				render_charts();
 			}
@@ -544,10 +552,30 @@
 			});
 
 			
-
-			d3.select("#vidReset").on("click",function(){
-				commentsPerVideoRow.filterAll();
+			// reset charts after filter operations
+			d3.select("a#resetAll").on("click",function(){
+				dc.filterAll();
 				render_charts();
+			});
+
+			d3.select("a#vidReset").on("click",function(){
+				commentPerVideoRow.filterAll();
+				dc.redrawAll()
+			});
+
+			d3.select("a#bubReset").on("click",function(){
+				rateBubble.filterAll();
+				dc.redrawAll()
+			});
+
+			d3.select("a#studReset").on("click",function(){
+				commentsPerCommentatorRow.filterAll();
+				dc.redrawAll()
+			});
+
+			d3.select("a#aspReset").on("click",function(){
+				barAspect.filterAll();
+				dc.redrawAll()
 			});
 
 
