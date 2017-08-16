@@ -31,6 +31,7 @@
 <ul class="nav nav-tabs">
 	<li class="active"><a data-toggle="tab" href="#videoTab">Video Analytics</a></li>
   	<li><a data-toggle="tab" href="#studentab">Student Analytics</a></li>
+  	<li><a data-toggle="tab" href="#activitytab">Intro Activity</a></li>
 </ul>
 
 <div class="tab-content"> <!-- tab content -->
@@ -49,7 +50,7 @@
 
 	    <div class="row">
 	    	<div class="col-md-7">
-	    		<h4>Impact of Individual Student Comment (Size of bubble is Number of Ratings by other students) <small><a href='#' id="bubReset">reset</a></small></h4>
+	    		<h4>Number of Ratings of Student comments (Size of Bubble is Amount of Ratings) <small><a href='#' id="bubReset">reset</a></small></h4>
 				<p class="instruct-left">click any bubble to select. Hover to see detailed info. </p>
 	    	</div>
 	    	<div class="col-md-5">
@@ -69,6 +70,7 @@
 	    </div>
 
 	    <div class="container" id="rateBubble"></div>
+	    <div class="container" id="bubRange"></div>
 		
   </div><!-- end of video tab -->
 
@@ -76,7 +78,7 @@
   
 
 
-  			<div class="row" style="border-bottom: solid black thick">
+  			<div class="row">
 				<div class="col-md-6" id=commentatorRow>
 					<h4>Number of Comments Per Student <small><a href='#' id="studReset">reset</a></small></h4>
 				 	<p class="instruct-left">click to select (affects other charts)</p>
@@ -87,7 +89,7 @@
 				</div>
 			</div>
 
-	 	 	<div class="container-fluid">
+	 	 	<!--<div class="container-fluid">
 	 	 		<h4>Student Comment Sentiment per video</h4>
 	 	 	</div>
 	 	 	<div class="row" style="padding:2em;">
@@ -152,9 +154,91 @@
 		 	<div class="col-md-2"><p>Please wait for chart to load after pressing the button</p></div>
 		</div>
 
-		<div class="container" id=sentiplot></div>
+		<div class="container" id=sentiplot></div>-->
 	 	
   </div><!-- end of student tab -->
+
+  <div id="activitytab" class="tab-pane">
+  	<div class="container">
+	  	<h4>INTRODUCTORY ACTIVITIES</h4>
+	  	<p>
+	  		The activities here are meant to give the user a brief overview of
+	  		the dashboard. More detailed help can be found in the 
+	  		<a href="{{ url_for('help') }}">HELP</a> section. It is 
+	  		<strong>recommended</strong> that all first time users complete
+	  		the instructions here before using the tool.
+	  	</p>
+	  	<h4>OVERVIEW</h4>
+	  	<p>
+	  		The main point to note about the dashboard is that all the charts are 
+	  		interrelated i.e. interacting with any of them causes a change in others.
+	  		This is the way filtering is achieved. To demonstrate this, the following
+	  		examples would be used.
+	  	</p>
+	  	<p>
+	  		<strong>EXAMPLE 1.</strong> What student used the "Delivery" aspect the most?
+	  	</p>
+	  	<ol>
+	  		<li>
+	  			To answer this question, we first need to go into the Student Analytics tab
+	  			because it involves both the student comments and aspect charts which are both 
+	  			located in that tab.
+	  		</li>
+	  		<li>
+	  			Next, we need to filter the student chart to get only students who used the 
+	  			Delivery aspect. This is impossible using just the student comment chart, so
+	  			we filter it using the aspect chart. We simply click on the Delivery bar.
+	  			This immediately highlights that bar alone (i.e leaves it colored while others
+	  			become grayed out)
+	  		</li>
+	  		<li>
+	  			Now that only the Delivery aspect is active, we just need to look at the student comment
+	  			chart and pick the student with the most comments. Remember, by filtering the aspect
+	  			chart, we have also filtered all other charts to show data relevant to the filtered
+	  			value which is the Delivery aspect.
+	  		</li>
+	  		<li>
+	  			From the student chart, we see that student <em>LstudyID209</em> has the most comments. 
+	  			This is the student we seek.
+	  		</li>
+	  	</ol>
+
+	  	<p>
+	  		<strong>EXAMPLE 2.</strong>What aspect is most used in the TUTORIAL videos? And How many times
+	  		exactly is this aspect used?
+	  	</p>
+	  	<ol>
+	  		<li>
+	  			When tackling a new problem, it is good to clear all previous filters and have
+	  			all the charts in their default state. The fastest way to do this is to click
+	  			the "Reset all charts" link just below the navigation bar and above the tabs.
+	  		</li>
+	  		<li>
+	  			Next, we need to filter the aspects chart using videos i.e. we need to 
+	  			select only the TUTORIAL videos as the question states. To do this, simply
+	  			click on each of the TUTORIAL bars of the video chart in the "Video Analytics" tab.
+	  			All the TUTORIAL bars should be colored now, while the others would be grayed out.
+	  		</li>
+	  		<li>
+	  			Now that all the charts reflect the filter from the first step, all we have to do 
+	  			is open the "Student Analytics" tab and look at the aspects chart for the most used
+	  			aspect. We can see that the aspect "I like this point" is the most used, thereby 
+	  			answering the first part of the question.
+	  		</li>
+	  		<li>
+	  			As for the second part, we need to get an exact value. By simply looking at the chart,
+	  			we know that the value is over 165 but it is hard to give a more accurate estimation.
+	  			To get an exact value, hover the mouse on that particular bar and the needed info 
+	  			appears. We can see the anser is 171.
+	  		</li>
+	  	</ol>
+	  	<p>
+	  		These two examples have demonstrated the most fundamental means of interaction possible with
+	  		the dashboard i.e. <strong>click</strong> and <strong>hover</strong>. 
+	  		Playing around could help consolidate understanding of the dashboard.
+	  	</p>
+  	</div>
+  </div><!--end of activity tab -->
 
 
 </div> <!-- tab content end --> 
@@ -318,7 +402,7 @@
 
 				commentsPerCommentatorRow = dc.rowChart('#commentatorRow');
 				commentsPerCommentatorRow.width(700)
-										 .height(500)
+										 .height(600)
 										 .dimension(commentatorDim)
 										 .group(commentsPerCommentator)
 										 .elasticX(true)
@@ -337,7 +421,7 @@
 				var barGroup = barAspectDim.group().reduceCount();
 				barAspect = dc.rowChart("#barAspect")
 				barAspect.width(700)
-						 .height(500)
+						 .height(600)
 						 .elasticX(true)
 						 .colors('#fdae6b')
           				 .dimension(barAspectDim)
@@ -445,7 +529,7 @@
 	    			});
 			} // end sentimentCall
 
-			
+
 			function ratingChart(){
 				var bubDim = ndx.dimension(function(d){
 					return d.COMMENTATOR;
@@ -495,12 +579,12 @@
 						  .colorDomain([0,100])
 						  .renderHorizontalGridLines(true)
 						  .renderVerticalGridLines(true)
-						  .maxBubbleRelativeSize(0.3)
-					      .x(d3.scale.linear().domain([0, 100]))
+						  .maxBubbleRelativeSize(0.2)
+					      .x(d3.scale.linear().domain([0, 65]))
 					      .elasticX(true)
-					      .y(d3.scale.linear().domain([0, 300]))
+					      .y(d3.scale.linear().domain([0, 350]))
 					      .elasticY(true)
-					      .r(d3.scale.linear().domain([0, 700]))
+					      .r(d3.scale.linear().domain([0, 500]))
 					      .xAxisLabel("Total Number of Comments")
 					      .yAxisLabel("Number of Ratings for the Comments ")
 					      .renderTitle(true)
@@ -511,7 +595,6 @@
 					      		   "Total Learning Trigger Ratings: "+p.value.triggerSum;
 					      });
 
-				
 			} // end rating chart
 
 
